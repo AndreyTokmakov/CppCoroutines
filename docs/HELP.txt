@@ -1,0 +1,183 @@
+
+Coroutine Functions and Suspension Points
+A coroutine function is a special type of function in C++ that can be suspended and resumed at specific points
+during its execution.
+This is achieved using three key keywords: co_await, co_yield, and co_return.
+
+1. co_await:  This keyword is used to suspend the execution of the coroutine until a particular condition is met or an asynchronous operation is completed.
+              The idea of having two keywords is that ‘await’ is used to indicate a thing you want to wait for, whereas ‘yield’ is used to specify a value you want to deliver to someone else. 
+
+              The general idea is that, whatever operand you provide to the co_await keyword, the compiler has to convert it into an awaiter object that will tell it how to manage the suspension.
+
+              Унарный оператор, позволяющий, в общем случае, приостановить выполнение сопрограммы и
+              передать управление вызывающей стороне, пока не завершатся вычисления представленные операндом;
+
+2. co_yield:  This keyword allows the coroutine to produce a value and suspend its execution.
+              It can be resumed later, continuing from the point after co_yield.
+
+              Унарный оператор, частный случай оператора co_await, позволяющий приостановить выполнение сопрограммы
+              и передать управление и значение операнда вызывающей стороне;
+
+3. co_return: This keyword is used to return a value from the coroutine and finalize its execution.
+
+              Оператор завершает работу сопрограммы, возвращая значение, после вызова сопрограмма
+              больше не сможет возобновить свое выполнение.
+
+
+
+===================================================================================================================
+                                   promise_type
+===================================================================================================================
+
+• initial_suspend() :  
+
+    Specify whether the coroutine should start suspended, or run immediately
+    Must return a type that functions as an awaiter. 
+
+    If return:
+
+        std::suspend_never{}   -> This causes the coroutine not to suspend itself on startup, which means that before control returns to main(), 
+                                  the coroutine code will actually start running
+
+        std::suspend_always{}  -> then the newly created coroutine would be suspended at the beginning of its function body.                 
+
+
+• void return_void() | return_type return_value()
+
+    Specify what to do when the coroutine returns normally
+
+    return_void()     :  if the coroutine doesn’t return a value at all
+                         return_void() which will be called when 'co_return' is executed without a value, or when code falls off the end of the coroutine.
+
+    return_value()    :  would have been called when the coroutine executed 'co_return'  ** WITH ** a return-value expression.         
+
+
+    Note : that you must implement exactly one of those two methods in a promise type! 
+    It’s an error not to implement either, and it’s an error to implement both. 
+    So you’re not allowed to write a coroutine that returns a value from some 'co_return' statements and no value from others.   
+
+===================================================================================================================
+                                   Awaitables
+===================================================================================================================
+
+Объект типа Awaitable определяется в результате разрешения перегрузки (overloadresolution) и вызова оператора co_await.
+
+Объекты типа Awaitable определяют семантику потока управления сопрограммы.
+Позволяют:
+-   Определить, следует ли приостанавливать выполнение сопрограммы в точке вызова оператора co_await();
+-   Выполнить некоторую логику после приостановления выполнения сопрограммы для дальнейшего планирования
+    возобновления ее работы (асинхронные операции);
+-   Получить результат вызова оператора co_await, после возобновления работы.
+
+
+In C++, there are two built-in types like
+-   std::suspend_always
+-   std::suspend_never.
+
+We create custom awaitable types that define specific suspension and resumption behavior:
+An awaitable type is any type that implements the following methods:
+
+1. await_ready()  : Determines if the coroutine should suspend or continue without suspension.
+
+2. await_suspend(): Defines what happens when the coroutine is suspended.
+                    This can involve storing the coroutine handle, initiating an asynchronous operation,
+                    or interacting with other coroutines.
+
+3. await_resume() : Defines what happens when the coroutine is resumed
+                    Often returning a value or performing some final action before execution continues.
+
+===================================================================================================================
+                                 Awaitables | Call --- Use Logic
+===================================================================================================================
+
+1. when await_ready() called and if it returns TRUE   ==>  await_resume()  function will called
+2. when await_ready() called and if it returns FALSE  ==>  await_suspend() function will called
+
+
+===================================================================================================================
+                                 Awaitables | Examples
+===================================================================================================================
+
+        struct Awaiter
+        {
+            bool await_ready() noexcept {
+                  return true;
+            }
+
+            SuspendReturnType await_suspend(std::coroutine_handle<OurPromiseType> handle);
+
+            ResumeReturnType await_resume();
+        };
+
+            ИЛИ КАК ТО ТАК
+
+        struct Awaitable
+        {
+           bool await_ready() noexcept {
+                return true;
+           }
+
+           void await_suspend(std::coroutine_handle<Task::promise_type> hCoro) noexcept {
+           }
+
+           void await_resume() {
+           }
+
+           ///  ----- OR ----- await_resume()  --> reuturn value
+
+           [[nodiscard]]
+           std::string await_resume() const noexcept
+           {
+
+           }
+        }
+
+Например, мы хотим создать механизм отложенного выполнения, который позволит
+функции уснуть на некоторое время, вернет управление вызывающей стороне, после чего
+продолжить свое выполнение через заданное время.
+
+    Task foo()
+    {
+        // выполнить некоторый набор операций вернуть управление
+        co_await std::chrono::seconds(10);
+        // через 10 секунд выполнить еще один набор операций.
+    }
+
+
+Custom Awaitable Types: --- Как создать и использовать ------
+
+1. Объявить и вернуть тип Awaitables как метод самого типа корутины (как promise_type)
+
+    template<typename Rep, typename Period>
+    auto operator co_await(std::chrono::duration<Rep, Period> duration) noexcept
+    {
+        struct Awaitable
+        {
+            std::chrono::system_clock::duration timeout;
+            explicit Awaitable(std::chrono::system_clock::duration<Rep, Period> duration): timeout(duration) {
+            }
+        };
+
+        return Awaitable{ duration };
+    }
+
+2. Объявить отдельно тип Awaitable но вернуть его из
+
+    struct Awaitable {
+    };
+
+    struct promise_type
+    {
+        CoroType get_return_object() {
+            return CoroType { std::coroutine_handle<promise_type>::from_promise(*this) };
+        }
+
+        Awaitable await_transform(const std::string& filename) noexcept {
+                return FileReadAwaiter { filename };
+        }
+
+        std::suspend_never initial_suspend() { return {}; }
+        std::suspend_never final_suspend() noexcept { return {}; }
+        void return_void() { }
+        void unhandled_exception() { std::terminate(); }
+    };

@@ -30,3 +30,17 @@
 *.exe
 *.out
 *.app
+
+# Executables
+*callgrind.out.*
+
+
+/cmake-build-debug*
+/cmake-build-release*
+/FinTechMarketProjects/data/*
+/FuzzingExperiments/fuzzer
+/FuzzingExperiments/crash*
+.idea/
+test_bin
+
+
