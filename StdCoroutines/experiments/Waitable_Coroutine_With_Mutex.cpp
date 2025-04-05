@@ -74,6 +74,8 @@ namespace
         bool await_ready() noexcept
         {
             std::println("[{}] Awaiter::await_ready(), thread_id: {}", getCurrentTime(), std::this_thread::get_id());
+
+            /** TRUE ==> await_resume() or in case FALSE ==> await_suspend() will be called **/
             return false;
         }
 

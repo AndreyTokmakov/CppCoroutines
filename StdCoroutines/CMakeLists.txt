@@ -43,6 +43,7 @@ add_executable(${PROJECT_NAME}
 
         simple_examples/Multiple_Awaiters_Resolution.cpp
         simple_examples/Multiple_Awaiters_Resolution_2.cpp
+        simple_examples/Mutiple_Awaiters_Initiail_Final.cpp
 
         simple_examples/Yield_Coroutine.cpp
         simple_examples/Yield_Coroutine_Values_from_List.cpp

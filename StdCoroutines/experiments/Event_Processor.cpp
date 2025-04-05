@@ -76,6 +76,8 @@ namespace
             bool await_ready() const
             {
                 std::println("[{}] [{}] \t await_ready() --> {}", tid(), time(), !queue.events.empty());
+
+                /** TRUE ==> await_resume() or in case FALSE ==> await_suspend() will be called **/
                 return !queue.events.empty();
             }
 

@@ -54,6 +54,7 @@ namespace
             TaskAwaiter &operator=(TaskAwaiter &) = delete;
 
             bool await_ready() noexcept {
+                /** TRUE ==> await_resume() or in case FALSE ==> await_suspend() will be called **/
                 return false;
             }
 

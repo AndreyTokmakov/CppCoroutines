@@ -43,6 +43,8 @@ namespace
             bool await_ready()
             {
                 std::println("[{}] [{}] TaskAwaiter::await_ready() -> false", tid(), time());
+
+                /** TRUE ==> await_resume() or in case FALSE ==> await_suspend() will be called **/
                 return false;
             }
 

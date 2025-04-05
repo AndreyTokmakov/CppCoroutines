@@ -44,6 +44,8 @@ namespace
         bool await_ready() noexcept
         {
             info(std::format("  <--- Awaiter::await_ready({})", ReadyFlag));
+
+            /** TRUE ==> await_resume() or in case FALSE ==> await_suspend() will be called **/
             return ReadyFlag;
         }
 

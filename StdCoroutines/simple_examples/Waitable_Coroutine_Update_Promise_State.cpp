@@ -84,6 +84,8 @@ namespace
         bool await_ready() const noexcept
         {
             std::println("[{}] [{}] Awaiter::await_ready()", tid(), time());
+
+            /** TRUE ==> await_resume() or in case FALSE ==> await_suspend() will be called **/
             return true;
         }
 

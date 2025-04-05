@@ -37,6 +37,8 @@ namespace State_Stored_in_Awaitable
             {
                 constexpr bool await_success = false;
                 std::println("[{}] [{}] \t await_ready() --> {}", tid(), time(), await_success);
+
+                /** TRUE ==> await_resume() or in case FALSE ==> await_suspend() will be called **/
                 return await_success;
             }
 
@@ -116,7 +118,8 @@ namespace State_Stored_in_Coroutine
             {
                 constexpr bool await_success = false;
                 std::println("[{}] [{}] \t await_ready() --> {}", tid(), time(), await_success);
-                return await_success;
+
+                return await_success;  /** TRUE ==> await_resume() or in case FALSE ==> await_suspend() will be called **/
             }
 
             void await_suspend(const std::coroutine_handle<PromiseType>& hInputCoro) const {

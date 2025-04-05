@@ -37,13 +37,14 @@ int main([[maybe_unused]] int argc,
     // Simple::Awaiter_and_Awaitable::TestAll();
     // Simple::Waitable_Coroutine::TestAll();
     // Simple::Waitable_Coroutine_2::TestAll();
-    Simple::Waitable_Coroutine_Update_Promise_State::TestAll();
+    // Simple::Waitable_Coroutine_Update_Promise_State::TestAll();
+    // Simple::Multiple_Awaiters_Resolution::TestAll();
+    // Simple::Multiple_Awaiters_Resolution_2::TestAll();
+    Simple::Mutiple_Awaiters_Initiail_Final::TestAll();
 
     // Simple::Yield_Coroutine::TestAll();
     // Simple::Yield_Coroutine_Values_from_List::TestAll();
 
-    // Simple::Multiple_Awaiters_Resolution::TestAll();
-    // Simple::Multiple_Awaiters_Resolution_2::TestAll();
 
     // Generators::TestAll();
 

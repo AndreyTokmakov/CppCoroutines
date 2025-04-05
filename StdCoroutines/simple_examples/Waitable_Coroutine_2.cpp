@@ -108,6 +108,8 @@ namespace DefaultTimeout
             **/
 
             std::println("[{}] [{}] Awaiter::await_ready()", tid(), time());
+
+            /** TRUE ==> await_resume() or in case FALSE ==> await_suspend() will be called **/
             return false;
         }
 
@@ -190,6 +192,8 @@ namespace TimeoutAsParameter
              *  Use case : suspension depends on some data availability
             **/
             std::println("[{}] [{}] Awaiter::await_ready()", tid(), time());
+
+            /** TRUE ==> await_resume() or in case FALSE ==> await_suspend() will be called **/
             return false;
         }
 

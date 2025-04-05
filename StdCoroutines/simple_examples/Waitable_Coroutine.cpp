@@ -84,6 +84,8 @@ namespace
              *  Use case : suspension depends on some data availability
             **/
             std::println("[{}] AwaiterTimer::await_ready()", getCurrentTime());
+
+            /** TRUE ==> await_resume() or in case FALSE ==> await_suspend() will be called **/
             return false;
         }
 

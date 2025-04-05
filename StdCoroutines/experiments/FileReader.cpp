@@ -61,6 +61,8 @@ namespace
                  *  Use case : suspension depends on some data availability
                 **/
                 std::println("[{}] [{}] FileReadAwaiter::await_ready({})", tid(), time(), filepath);
+
+                /** TRUE ==> await_resume() or in case FALSE ==> await_suspend() will be called **/
                 return false;
             }
 

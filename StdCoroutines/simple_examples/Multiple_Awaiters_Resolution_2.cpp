@@ -75,6 +75,8 @@ namespace
         bool await_ready() noexcept
         {
             std::println("[{}] [{}] DurationAwaiter::await_ready()", tid(), time());
+
+            /** TRUE ==> await_resume() or in case FALSE ==> await_suspend() will be called **/
             return false;
         }
 
@@ -106,6 +108,8 @@ namespace
         bool await_ready() noexcept
         {
             std::println("[{}] [{}] EventAwaiter::await_ready()", tid(), time());
+
+            /** TRUE ==> await_resume() or in case FALSE ==> await_suspend() will be called **/
             return false;
         }
 

@@ -28,6 +28,7 @@ namespace StdCoroutines::Simple
     namespace Waitable_Coroutine_Update_Promise_State { void TestAll(); }
     namespace Multiple_Awaiters_Resolution { void TestAll(); }
     namespace Multiple_Awaiters_Resolution_2 { void TestAll(); }
+    namespace Mutiple_Awaiters_Initiail_Final { void TestAll(); }
     namespace Yield_Coroutine { void TestAll(); }
     namespace Yield_Coroutine_Values_from_List { void TestAll(); }
 }
