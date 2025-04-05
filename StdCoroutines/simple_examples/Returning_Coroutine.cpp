@@ -9,9 +9,6 @@ Description : Simple Coroutine returning value
 
 #include "SimpleCoroutines.h"
 
-#include <coroutine>
-#include <print>
-
 /**
  * How to make Coroutine to return Non-Void value:
  *  --> Need to implement 'return_value(auto val)' method

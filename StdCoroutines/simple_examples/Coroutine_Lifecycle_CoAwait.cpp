@@ -9,11 +9,7 @@ Description : Simple Coroutine lifecycle demo
 
 #include "SimpleCoroutines.h"
 
-#include <coroutine>
-#include <print>
-
 /**
-
 Coroutine Functions and Suspension Points
 A coroutine function is a special type of function in C++ that can be suspended and resumed at specific points
 during its execution.

@@ -10,6 +10,10 @@ Description : Experiments.h
 #ifndef CPPCOROUTINES_EXPERIMENTS_H
 #define CPPCOROUTINES_EXPERIMENTS_H
 
+#include "Utilities.h"
+#include <print>
+#include <coroutine>
+
 namespace StdCoroutines::Experiments
 {
     void TestAll();

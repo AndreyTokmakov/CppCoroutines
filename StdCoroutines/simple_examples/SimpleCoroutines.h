@@ -10,6 +10,10 @@ Description : SimpleCoroutines.h
 #ifndef CPPCOROUTINES_SIMPLECOROUTINES_H
 #define CPPCOROUTINES_SIMPLECOROUTINES_H
 
+#include "Utilities.h"
+#include <print>
+#include <coroutine>
+
 namespace StdCoroutines::Simple
 {
     namespace Coroutine_Lifecycle_CoAwait { void TestAll(); }

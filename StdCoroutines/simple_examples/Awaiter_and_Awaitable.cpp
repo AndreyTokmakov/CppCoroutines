@@ -8,22 +8,12 @@ Description :
 ============================================================================**/
 
 #include "SimpleCoroutines.h"
-#include "Utilities.h"
-
-#include <chrono>
 #include <thread>
-#include <random>
-#include <vector>
-
-#include <coroutine>
-#include <print>
-#include <source_location>
 
 namespace
 {
     auto tid() { return std::this_thread::get_id(); }
     auto time() { return Utilities::getCurrentTime(); }
-
 }
 
 namespace

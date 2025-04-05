@@ -8,11 +8,6 @@ Description : Simple Coroutine Waitable
 ============================================================================**/
 
 #include "SimpleCoroutines.h"
-#include "Utilities.h"
-
-#include <coroutine>
-#include <print>
-#include <chrono>
 #include <thread>
 
 namespace

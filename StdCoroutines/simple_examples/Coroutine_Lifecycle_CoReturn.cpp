@@ -8,10 +8,6 @@ Description : Simple_Coroutine.cpp
 ============================================================================**/
 
 #include "SimpleCoroutines.h"
-#include "Utilities.h"
-
-#include <coroutine>
-#include <print>
 
 namespace
 {

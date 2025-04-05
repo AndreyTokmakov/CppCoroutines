@@ -8,11 +8,8 @@ Description : Calculating average
 ============================================================================**/
 
 #include "Experiments.h"
-
 #include <iostream>
-#include <chrono>
-#include <coroutine>
-#include <generator>
+
 
 namespace
 {

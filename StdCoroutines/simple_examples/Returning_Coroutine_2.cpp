@@ -9,9 +9,6 @@ Description : Simple Coroutine returning value
 
 #include "SimpleCoroutines.h"
 
-#include <coroutine>
-#include <print>
-
 namespace
 {
     struct ReturnValueCoroutine
