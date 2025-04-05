@@ -141,16 +141,16 @@ namespace
 
 namespace
 {
-    struct TaskPromise
+    struct TaskPromiseCoroutine
     {
         struct promise_type
         {
             int data { 0 };
 
-            TaskPromise get_return_object()
+            TaskPromiseCoroutine get_return_object()
             {
                 std::println("[{}] [{}] \tpromise_type::get_return_object()", tid(), time());
-                return TaskPromise {std::coroutine_handle<promise_type>::from_promise(*this)};
+                return TaskPromiseCoroutine {std::coroutine_handle<promise_type>::from_promise(*this)};
             }
 
             InitialAwaiter initial_suspend() {
@@ -172,18 +172,33 @@ namespace
                 std::terminate();
             }
 
-            EventAwaiter<TaskPromise> await_transform(const Event& event) noexcept {
-                return EventAwaiter<TaskPromise>(event);
+            EventAwaiter<TaskPromiseCoroutine> await_transform(const Event& event) noexcept {
+                return EventAwaiter<TaskPromiseCoroutine>(event);
             }
         };
 
-        std::coroutine_handle<promise_type> handle;
+        std::coroutine_handle<promise_type> coroHandle;
+
+        explicit TaskPromiseCoroutine(const std::coroutine_handle<promise_type> handle) : coroHandle { handle } {
+            std::println("ReturnValueCoroutine()");
+        }
+
+        ~TaskPromiseCoroutine()
+        {
+            if (coroHandle) {
+                coroHandle.destroy();
+            }
+
+            /** Without it destructor FinalAwaiter::~FinalAwaiter() will not be called
+            *   Will have a mem leak
+            */
+        }
     };
 }
 
 namespace
 {
-    TaskPromise createCoroutine(auto timeoutEvent)
+    TaskPromiseCoroutine createCoroutine(auto timeoutEvent)
     {
         std::println("[{}] [{}] createCoroutine() step 1", tid(), time());
         co_await timeoutEvent;
@@ -205,13 +220,13 @@ void StdCoroutines::Simple::Mutiple_Awaiters_Initiail_Final::TestAll()
 {
 
     std::println("[{}] [{}] main(0)",tid(), time());
-    TaskPromise promise = createCoroutine(Event {std::chrono::seconds(1u)} );
+    TaskPromiseCoroutine coroTask = createCoroutine(Event {std::chrono::seconds(1u)} );
 
-    size_t result = promise.handle.promise().data;
+    size_t result = coroTask.coroHandle.promise().data;
     std::println("[{}] [{}] main(1). result = {}", tid(), time(), result);
-    promise.handle.resume();
+    coroTask.coroHandle.resume();
 
-    result = promise.handle.promise().data;
+    result = coroTask.coroHandle.promise().data;
     std::println("[{}] [{}] main(2). result = {}", tid(), time(), result);
 }
 
