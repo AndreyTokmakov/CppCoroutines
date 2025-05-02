@@ -28,30 +28,26 @@ add_executable(${PROJECT_NAME}
         experiments/FileReader.cpp
         experiments/TaskCoordination.cpp
         experiments/Event_Processor.cpp
+        experiments/State_Machine_Simple.cpp
+        experiments/Waitable_Coroutine_With_Mutex.cpp
 
         simple_examples/Coroutine_Lifecycle_CoReturn.cpp
         simple_examples/Coroutine_Lifecycle_CoAwait.cpp
-
         simple_examples/Resuming_Coroutine_1.cpp
-
         simple_examples/Returning_Coroutine.cpp
         simple_examples/Returning_Coroutine_2.cpp
-
         simple_examples/Waitable_Coroutine.cpp
         simple_examples/Waitable_Coroutine_2.cpp
         simple_examples/Waitable_Coroutine_Update_Promise_State.cpp
-
         simple_examples/Multiple_Awaiters_Resolution.cpp
         simple_examples/Multiple_Awaiters_Resolution_2.cpp
         simple_examples/Mutiple_Awaiters_Initiail_Final.cpp
-
         simple_examples/Yield_Coroutine.cpp
         simple_examples/Yield_Coroutine_Values_from_List.cpp
-
-        experiments/Waitable_Coroutine_With_Mutex.cpp
         simple_examples/Awaiter_Lifecycle_Steps.cpp
         simple_examples/Awaiter_and_Awaitable.cpp
-        experiments/State_Machine_Simple.cpp
+
+        tests/Coroutine_Tests.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${UTILS_LIBRARY_DIR})

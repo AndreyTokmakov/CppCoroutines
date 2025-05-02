@@ -14,6 +14,7 @@ Description : Coroutines
 #include "generators/Generators.h"
 #include "simple_examples/SimpleCoroutines.h"
 #include "experiments/Experiments.h"
+#include "tests/Coroutine_Tests.h"
 
 
 int main([[maybe_unused]] int argc,
@@ -23,30 +24,23 @@ int main([[maybe_unused]] int argc,
 
     using namespace StdCoroutines;
 
+    // Generators::TestAll();
 
     // Simple::Coroutine_Lifecycle_CoAwait::TestAll();
     // Simple::Coroutine_Lifecycle_CoReturn::TestAll();
-
     // Simple::Awaiter_Lifecycle_Steps::TestAll();
-
     // Simple::Returning_Coroutine::TestAll();
     // Simple::Returning_Coroutine_2::TestAll();
-
     // Simple::Resuming_Coroutine_1::TestAll();
-
     // Simple::Awaiter_and_Awaitable::TestAll();
     // Simple::Waitable_Coroutine::TestAll();
     // Simple::Waitable_Coroutine_2::TestAll();
     // Simple::Waitable_Coroutine_Update_Promise_State::TestAll();
     // Simple::Multiple_Awaiters_Resolution::TestAll();
     // Simple::Multiple_Awaiters_Resolution_2::TestAll();
-    Simple::Mutiple_Awaiters_Initiail_Final::TestAll();
-
+    // Simple::Mutiple_Awaiters_Initiail_Final::TestAll();
     // Simple::Yield_Coroutine::TestAll();
     // Simple::Yield_Coroutine_Values_from_List::TestAll();
-
-
-    // Generators::TestAll();
 
     // Experiments::TestAll();
     // Experiments::Waitable_Coroutine_With_Mutex::TestAll();
@@ -56,9 +50,11 @@ int main([[maybe_unused]] int argc,
     // Experiments::State_Machine_Simple::TestAll();
     // Experiments::Generic_TaskBased_Coroutine::TestAll();
     // Experiments::FileReader::TestAll();        // <------------- Not working
-    // Experiments::TaskCoordination::TestAll();     // <------------- Not working
+    // Experiments::TaskCoordination::TestAll();  // <------------- Not working
 
     // String_to_Integer_Parser::Test();
+
+    CoroutineTests::TestAll();
 
     return EXIT_SUCCESS;
 }

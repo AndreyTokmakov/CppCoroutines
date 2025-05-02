@@ -57,7 +57,7 @@ This is achieved using three key keywords: co_await, co_yield, and co_return.
     So you’re not allowed to write a coroutine that returns a value from some 'co_return' statements and no value from others.   
 
 ===================================================================================================================
-                                   Awaitables
+                                   Awaiter's
 ===================================================================================================================
 
 Объект типа Awaitable определяется в результате разрешения перегрузки (overloadresolution) и вызова оператора co_await.
@@ -70,7 +70,7 @@ This is achieved using three key keywords: co_await, co_yield, and co_return.
 -   Получить результат вызова оператора co_await, после возобновления работы.
 
 
-In C++, there are two built-in types like
+In C++, there are two built-in Awaiter types like
 -   std::suspend_always
 -   std::suspend_never.
 
@@ -87,7 +87,7 @@ An awaitable type is any type that implements the following methods:
                     Often returning a value or performing some final action before execution continues.
 
 ===================================================================================================================
-                                 Awaitables | Call --- Use Logic
+                                 Awaiter's | Call --- Use Logic
 ===================================================================================================================
 
 1. when await_ready() called and if it returns TRUE   ==>  await_resume()  function will called
@@ -95,7 +95,7 @@ An awaitable type is any type that implements the following methods:
 
 
 ===================================================================================================================
-                                 Awaitables | Examples
+                                 Awaiter's | Examples
 ===================================================================================================================
 
         struct Awaiter
@@ -111,7 +111,7 @@ An awaitable type is any type that implements the following methods:
 
             ИЛИ КАК ТО ТАК
 
-        struct Awaitable
+        struct Awaiter
         {
            bool await_ready() noexcept {
                 return true;
@@ -123,7 +123,7 @@ An awaitable type is any type that implements the following methods:
            void await_resume() {
            }
 
-           ///  ----- OR ----- await_resume()  --> reuturn value
+           ///  ----- OR ----- await_resume()  --> return value
 
            [[nodiscard]]
            std::string await_resume() const noexcept
