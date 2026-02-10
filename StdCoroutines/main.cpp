@@ -24,13 +24,17 @@ int main([[maybe_unused]] int argc,
 
     using namespace StdCoroutines;
 
-    // Generators::TestAll();
+    Generators::TestAll();
 
     // Simple::Coroutine_Lifecycle_CoAwait::TestAll();
     // Simple::Coroutine_Lifecycle_CoReturn::TestAll();
     // Simple::Awaiter_Lifecycle_Steps::TestAll();
+
     // Simple::Returning_Coroutine::TestAll();
     // Simple::Returning_Coroutine_2::TestAll();
+    // Simple::Return_Resume_Lifecycle::TestAll();
+    // Simple::Return_Resume_Example::TestAll();
+
     // Simple::Resuming_Coroutine_1::TestAll();
     // Simple::Awaiter_and_Awaitable::TestAll();
     // Simple::Waitable_Coroutine::TestAll();
@@ -54,7 +58,7 @@ int main([[maybe_unused]] int argc,
 
     // String_to_Integer_Parser::Test();
 
-    CoroutineTests::TestAll();
+    // CoroutineTests::TestAll();
 
     return EXIT_SUCCESS;
 }

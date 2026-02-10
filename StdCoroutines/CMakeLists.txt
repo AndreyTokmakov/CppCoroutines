@@ -33,9 +33,13 @@ add_executable(${PROJECT_NAME}
 
         simple_examples/Coroutine_Lifecycle_CoReturn.cpp
         simple_examples/Coroutine_Lifecycle_CoAwait.cpp
+
         simple_examples/Resuming_Coroutine_1.cpp
         simple_examples/Returning_Coroutine.cpp
         simple_examples/Returning_Coroutine_2.cpp
+        simple_examples/Return_Resume_Lifecycle.cpp
+        simple_examples/Return_Resume_Example.cpp
+
         simple_examples/Waitable_Coroutine.cpp
         simple_examples/Waitable_Coroutine_2.cpp
         simple_examples/Waitable_Coroutine_Update_Promise_State.cpp

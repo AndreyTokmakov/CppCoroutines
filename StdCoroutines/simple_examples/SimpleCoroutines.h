@@ -18,8 +18,12 @@ namespace StdCoroutines::Simple
 {
     namespace Coroutine_Lifecycle_CoAwait { void TestAll(); }
     namespace Coroutine_Lifecycle_CoReturn { void TestAll(); }
+
     namespace Returning_Coroutine { void TestAll(); }
     namespace Returning_Coroutine_2 { void TestAll(); }
+    namespace Return_Resume_Lifecycle { void TestAll(); }
+    namespace Return_Resume_Example { void TestAll(); }
+
     namespace Resuming_Coroutine_1 { void TestAll(); }
     namespace Awaiter_and_Awaitable { void TestAll(); }
     namespace Awaiter_Lifecycle_Steps { void TestAll(); }

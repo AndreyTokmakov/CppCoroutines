@@ -35,6 +35,130 @@ namespace StdCoroutines::Generators::SimpleExample
     }
 }
 
+namespace StdCoroutines::Generators::Simple_Generator
+{
+    struct Generator
+    {
+        struct promise_type
+        {
+
+            Generator get_return_object() noexcept {
+                return Generator { *this };
+            }
+#if 0
+            Generator get_return_object() noexcept {
+                return Generator {
+                    std::coroutine_handle<promise_type>::from_promise(*this)
+                };
+            }
+#endif
+
+            std::suspend_always initial_suspend() {
+                return {};
+            }
+
+            std::suspend_always final_suspend() noexcept {
+                return {};
+            }
+
+            std::suspend_always yield_value(int v) {
+                value = v;
+                return {};
+            }
+
+            void return_void() {
+            }
+
+            void unhandled_exception()
+            {
+                std::terminate();
+            }
+
+            [[nodiscard]]
+            int getValue() const noexcept
+            {
+                return value;
+            }
+
+        private:
+
+            int value { 0 };
+        };
+
+        std::coroutine_handle<promise_type> handle;
+
+#if 0
+        explicit Generator(std::coroutine_handle<promise_type> h) : handle(h) {
+        }
+#endif
+
+        explicit Generator(promise_type& promise) :
+            handle { std::coroutine_handle<promise_type>::from_promise(promise) } {
+        }
+
+        ~Generator()
+        {
+            if (handle) {
+                handle.destroy();
+            }
+        }
+
+        // Disable copying
+        Generator(const Generator&) = delete;
+        Generator& operator=(const Generator&) = delete;
+
+        // Enable moving
+        Generator(Generator&& other) noexcept  : handle { std::exchange(other.handle, nullptr) } {
+        }
+
+        Generator& operator=(Generator&& other) noexcept
+        {
+            if (this != &other) {
+                if (handle) {
+                    handle.destroy();
+                }
+                handle = other.handle;
+                other.handle = nullptr;
+            }
+            return *this;
+        }
+
+        bool next() {
+            if (!handle || handle.done())
+                return false;
+            handle.resume();
+            return !handle.done();
+        }
+
+        [[nodiscard]]
+        int value() const {
+            return handle.promise().getValue();
+        }
+    };
+
+    Generator count_to(int n)
+    {
+        for (int i = 1; i <= n; ++i) {
+            co_yield i;
+        }
+    }
+
+    void demo()
+    {
+        Generator gen = count_to(5);
+        while (gen.next()) {
+            std::cout << gen.value() << std::endl;
+        }
+
+        // 1
+        // 2
+        // 3
+        // 4
+        // 5
+    }
+}
+
+
 namespace StdCoroutines::Generators::Fibonacci_Sequence_Generator
 {
     std::generator<int> fibonacci_generator()
@@ -342,14 +466,168 @@ namespace StdCoroutines::Generators::Fibonacci_Sequence_Generator_3
     }
 }
 
+namespace StdCoroutines::Generators::Generic_Generator_ExcHandler
+{
+
+    template<typename T>
+    struct Generator
+    {
+        struct promise_type
+        {
+            T value {};
+
+            std::exception_ptr exception;
+
+            Generator get_return_object() {
+                return Generator { Handle::from_promise(*this) };
+            }
+
+            std::suspend_always initial_suspend() noexcept {
+                return {};
+            }
+
+            std::suspend_always final_suspend() noexcept {
+                return {};
+            }
+
+            std::suspend_always yield_value(T v) {
+                value = std::move(v);
+                return {};
+            }
+
+            void return_void() noexcept
+            {
+
+            }
+
+            void unhandled_exception() {
+                exception = std::current_exception();
+            }
+
+            template<typename U>
+            std::suspend_never await_transform(U&&) = delete;
+        };
+
+        using Handle = std::coroutine_handle<promise_type>;
+
+    private:
+        Handle handle_;
+
+    public:
+
+        explicit Generator(Handle h) : handle_(h) {
+        }
+
+        ~Generator() {
+            if (handle_) {
+                handle_.destroy();
+            }
+        }
+
+        Generator(const Generator&) = delete;
+        Generator& operator=(const Generator&) = delete;
+
+        Generator(Generator&& other) noexcept
+            : handle_ { std::exchange(other.handle_, nullptr) } {}
+
+        Generator& operator=(Generator&& other) noexcept
+        {
+            if (this != &other) {
+                if (handle_) {
+                    handle_.destroy();
+                }
+                handle_ = std::exchange(other.handle_, nullptr);
+            }
+            return *this;
+        }
+
+        class iterator
+        {
+            Handle handle_;
+
+        public:
+            using iterator_category = std::input_iterator_tag;
+            using value_type = T;
+            using difference_type = std::ptrdiff_t;
+            using pointer = T*;
+            using reference = T&;
+
+            iterator() : handle_(nullptr) {}
+            explicit iterator(Handle h) : handle_(h) {}
+
+            iterator& operator++()
+            {
+                handle_.resume();
+                if (handle_.done())
+                {
+                    auto& promise = handle_.promise();
+                    handle_ = nullptr;
+                    if (promise.exception) {
+                        std::rethrow_exception(promise.exception);
+                    }
+                }
+                return *this;
+            }
+
+            iterator operator++(int)
+            {
+                iterator temp = *this;
+                ++(*this);
+                return temp;
+            }
+
+            T& operator*() const {
+                return handle_.promise().value;
+            }
+
+            T* operator->() const {
+                return &handle_.promise().value;
+            }
+
+            bool operator==(const iterator& other) const {
+                return handle_ == other.handle_;
+            }
+
+            bool operator!=(const iterator& other) const {
+                return !(*this == other);
+            }
+        };
+
+        iterator begin()
+        {
+            if (handle_)
+            {
+                handle_.resume();
+                if (handle_.done())
+                {
+                    auto& promise = handle_.promise();
+                    if (promise.exception) {
+                        std::rethrow_exception(promise.exception);
+                    }
+                    return iterator{};
+                }
+            }
+            return iterator{handle_};
+        }
+
+        iterator end()
+        {
+            return iterator{};
+        }
+    };
+}
+
 
 
 void StdCoroutines::Generators::TestAll()
 {
     // SimpleExample::printLetters();
+    Simple_Generator::demo();
+
+
     // Fibonacci_Sequence_Generator::Test();
     // Fibonacci_Sequence_Generator_Ex::Test();
     // Fibonacci_Sequence_Generator_2::test();
-    Fibonacci_Sequence_Generator_3::test();
+    // Fibonacci_Sequence_Generator_3::test();
 }
 
