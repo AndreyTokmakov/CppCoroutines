@@ -16,6 +16,7 @@ Description : Coroutines
 #include "experiments/Experiments.h"
 #include "exception_handling/Exception_Handling.hpp"
 #include "tests/Coroutine_Tests.h"
+#include "use_cases/Cooperative_Multitasking.hpp"
 
 
 int main([[maybe_unused]] int argc,
@@ -57,9 +58,11 @@ int main([[maybe_unused]] int argc,
     // Experiments::FileReader::TestAll();        // <------------- Not working
     // Experiments::TaskCoordination::TestAll();  // <------------- Not working
 
-    Exception_Handling::TestAll();
+    // Exception_Handling::TestAll();
 
     // String_to_Integer_Parser::Test();
+
+    use_cases::cooperative_multitasking::TestAll();
 
     // CoroutineTests::TestAll();
 

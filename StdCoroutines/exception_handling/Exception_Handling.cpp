@@ -85,7 +85,7 @@ namespace StdCoroutines::Exception_Handling::simple_example
             std::cout << "Operation completed successfully" << std::endl;
         }
         catch (const std::exception& exc) {
-            std::cout << "Operation failed: " << exc.what() << std::endl;
+            std::cerr << "Operation failed: " << exc.what() << std::endl;
         }
 
         // Starting risky operation

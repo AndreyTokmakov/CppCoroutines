@@ -53,6 +53,8 @@ add_executable(${PROJECT_NAME}
 
         exception_handling/Exception_Handling.cpp
 
+        use_cases/Cooperative_Multitasking.cpp
+
         tests/Coroutine_Tests.cpp
 )
 
