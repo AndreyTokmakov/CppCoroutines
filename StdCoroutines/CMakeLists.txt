@@ -51,6 +51,8 @@ add_executable(${PROJECT_NAME}
         simple_examples/Awaiter_Lifecycle_Steps.cpp
         simple_examples/Awaiter_and_Awaitable.cpp
 
+        exception_handling/Exception_Handling.cpp
+
         tests/Coroutine_Tests.cpp
 )
 

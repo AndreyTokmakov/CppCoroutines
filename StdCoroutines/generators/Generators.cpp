@@ -37,6 +37,8 @@ namespace StdCoroutines::Generators::SimpleExample
 
 namespace StdCoroutines::Generators::Simple_Generator
 {
+    // INFO: https://www.vinniefalco.com/p/how-to-understand-c20-coroutines
+
     struct Generator
     {
         struct promise_type
@@ -300,7 +302,6 @@ namespace StdCoroutines::Fibonacci_Sequence_Generator_Ex
 
 namespace StdCoroutines::Generators::Fibonacci_Sequence_Generator_2
 {
-
     template <typename T>
     struct Generator
     {
@@ -385,7 +386,6 @@ namespace StdCoroutines::Generators::Fibonacci_Sequence_Generator_2
 
 namespace StdCoroutines::Generators::Fibonacci_Sequence_Generator_3
 {
-
     template <typename T>
     struct Generator
     {
@@ -468,6 +468,7 @@ namespace StdCoroutines::Generators::Fibonacci_Sequence_Generator_3
 
 namespace StdCoroutines::Generators::Generic_Generator_ExcHandler
 {
+    // INFO: https://www.vinniefalco.com/p/how-to-understand-c20-coroutines
 
     template<typename T>
     struct Generator
@@ -479,7 +480,7 @@ namespace StdCoroutines::Generators::Generic_Generator_ExcHandler
             std::exception_ptr exception;
 
             Generator get_return_object() {
-                return Generator { Handle::from_promise(*this) };
+                return Generator { *this };
             }
 
             std::suspend_always initial_suspend() noexcept {
@@ -495,12 +496,11 @@ namespace StdCoroutines::Generators::Generic_Generator_ExcHandler
                 return {};
             }
 
-            void return_void() noexcept
-            {
-
+            void return_void() noexcept {
             }
 
             void unhandled_exception() {
+                std::cerr << "promise_type::unhandled_exception()\n";
                 exception = std::current_exception();
             }
 
@@ -515,7 +515,8 @@ namespace StdCoroutines::Generators::Generic_Generator_ExcHandler
 
     public:
 
-        explicit Generator(Handle h) : handle_(h) {
+        explicit Generator(promise_type& promise) :
+            handle_ { std::coroutine_handle<promise_type>::from_promise(promise) } {
         }
 
         ~Generator() {
@@ -532,18 +533,16 @@ namespace StdCoroutines::Generators::Generic_Generator_ExcHandler
 
         Generator& operator=(Generator&& other) noexcept
         {
-            if (this != &other) {
-                if (handle_) {
-                    handle_.destroy();
-                }
-                handle_ = std::exchange(other.handle_, nullptr);
+            if (handle_) {
+                handle_.destroy();
             }
+            handle_ = std::exchange(other.handle_, nullptr);
             return *this;
         }
 
         class iterator
         {
-            Handle handle_;
+            Handle handle { nullptr };
 
         public:
             using iterator_category = std::input_iterator_tag;
@@ -552,16 +551,16 @@ namespace StdCoroutines::Generators::Generic_Generator_ExcHandler
             using pointer = T*;
             using reference = T&;
 
-            iterator() : handle_(nullptr) {}
-            explicit iterator(Handle h) : handle_(h) {}
+            iterator() = default;
+            explicit iterator(Handle h) : handle(h) {}
 
             iterator& operator++()
             {
-                handle_.resume();
-                if (handle_.done())
+                handle.resume();
+                if (handle.done())
                 {
-                    auto& promise = handle_.promise();
-                    handle_ = nullptr;
+                    auto& promise = handle.promise();
+                    handle = nullptr;
                     if (promise.exception) {
                         std::rethrow_exception(promise.exception);
                     }
@@ -577,15 +576,15 @@ namespace StdCoroutines::Generators::Generic_Generator_ExcHandler
             }
 
             T& operator*() const {
-                return handle_.promise().value;
+                return handle.promise().value;
             }
 
             T* operator->() const {
-                return &handle_.promise().value;
+                return &handle.promise().value;
             }
 
             bool operator==(const iterator& other) const {
-                return handle_ == other.handle_;
+                return handle == other.handle;
             }
 
             bool operator!=(const iterator& other) const {
@@ -600,14 +599,13 @@ namespace StdCoroutines::Generators::Generic_Generator_ExcHandler
                 handle_.resume();
                 if (handle_.done())
                 {
-                    auto& promise = handle_.promise();
-                    if (promise.exception) {
+                    if (auto& promise = handle_.promise(); promise.exception) {
                         std::rethrow_exception(promise.exception);
                     }
                     return iterator{};
                 }
             }
-            return iterator{handle_};
+            return iterator { handle_ };
         }
 
         iterator end()
@@ -615,6 +613,65 @@ namespace StdCoroutines::Generators::Generic_Generator_ExcHandler
             return iterator{};
         }
     };
+
+    Generator<int> range(const int start, const int end)
+    {
+        for (int i = start; i < end; ++i) {
+            co_yield i;
+        }
+    }
+
+    Generator<int> squares(const int n)
+    {
+        for (int i = 0; i < n; ++i) {
+            co_yield i * i;
+        }
+    }
+
+    Generator<int> may_throw(bool should_throw)
+    {
+        co_yield 1;
+        co_yield 2;
+        if (should_throw) {
+            throw std::runtime_error("Generator error");
+        }
+        co_yield 3;
+    }
+
+    void demo()
+    {
+        std::cout << "Range 1 to 5: ";
+        for (const int x : range(1, 6)) {
+            std::cout << x << " ";
+        }
+        std::cout << std::endl;
+
+        std::cout << "First 5 squares: ";
+        for (const int x : squares(5)) {
+            std::cout << x << " ";
+        }
+        std::cout << std::endl;
+
+        // Range 1 to 5: 1 2 3 4 5
+        // First 5 squares: 0 1 4 9 16
+    }
+
+    void handleExceptionDemo()
+    {
+        try {
+            for (int x : may_throw(true)) {
+                std::cout << x << std::endl;
+            }
+        }
+        catch (const std::exception& exc) {
+            std::cout << "Caught: " << exc.what() << std::endl;
+        }
+
+        // promise_type::unhandled_exception()
+        // 1
+        // 2
+        // Caught: Generator error
+    }
 }
 
 
@@ -622,8 +679,10 @@ namespace StdCoroutines::Generators::Generic_Generator_ExcHandler
 void StdCoroutines::Generators::TestAll()
 {
     // SimpleExample::printLetters();
-    Simple_Generator::demo();
+    // Simple_Generator::demo();
 
+    // Generic_Generator_ExcHandler::demo();
+    Generic_Generator_ExcHandler::handleExceptionDemo();
 
     // Fibonacci_Sequence_Generator::Test();
     // Fibonacci_Sequence_Generator_Ex::Test();

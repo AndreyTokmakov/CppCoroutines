@@ -14,6 +14,7 @@ Description : Coroutines
 #include "generators/Generators.h"
 #include "simple_examples/SimpleCoroutines.h"
 #include "experiments/Experiments.h"
+#include "exception_handling/Exception_Handling.hpp"
 #include "tests/Coroutine_Tests.h"
 
 
@@ -24,7 +25,7 @@ int main([[maybe_unused]] int argc,
 
     using namespace StdCoroutines;
 
-    Generators::TestAll();
+    // Generators::TestAll();
 
     // Simple::Coroutine_Lifecycle_CoAwait::TestAll();
     // Simple::Coroutine_Lifecycle_CoReturn::TestAll();
@@ -55,6 +56,8 @@ int main([[maybe_unused]] int argc,
     // Experiments::Generic_TaskBased_Coroutine::TestAll();
     // Experiments::FileReader::TestAll();        // <------------- Not working
     // Experiments::TaskCoordination::TestAll();  // <------------- Not working
+
+    Exception_Handling::TestAll();
 
     // String_to_Integer_Parser::Test();
 
