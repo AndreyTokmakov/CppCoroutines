@@ -60,6 +60,11 @@ namespace
         Task(Task&& other) noexcept : handle { std::exchange(other.handle, nullptr) } {
         }
 
+        Task& operator=(Task&& other) noexcept {
+            handle = std::exchange(other.handle, nullptr);
+            return *this;
+        }
+
         [[nodiscard]]
         bool done() const {
             return handle.done();
@@ -87,7 +92,7 @@ namespace
                     tasks[i].resume();
                     if (tasks[i].done()) {
                         // Will not compile - no Copy Constructor
-                        // tasks.erase(tasks.begin() + i);
+                        tasks.erase(tasks.begin() + i);
                     } else {
                         ++i;
                     }
@@ -96,7 +101,7 @@ namespace
         }
     };
 
-    Task worker(const std::string& name, const int iterations)
+    Task worker(std::string name, const int iterations)
     {
         for (int i = 0; i < iterations; ++i) {
             std::cout << name << " iteration " << i << std::endl;
@@ -115,4 +120,11 @@ namespace
 
 void use_cases::cooperative_multitasking::TestAll()
 {
+    demo();
+
+    // Alice iteration 0
+    // Bob iteration 0
+    // Alice iteration 1
+    // Bob iteration 1
+    // Alice iteration 2
 }
