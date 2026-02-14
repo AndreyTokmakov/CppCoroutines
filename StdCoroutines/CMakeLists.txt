@@ -55,6 +55,8 @@ add_executable(${PROJECT_NAME}
 
         use_cases/Cooperative_Multitasking.cpp
 
+        frame_custom_allocation/CustomAllocation.cpp
+
         tests/Coroutine_Tests.cpp
 )
 

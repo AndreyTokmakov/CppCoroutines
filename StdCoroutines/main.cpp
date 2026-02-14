@@ -17,6 +17,7 @@ Description : Coroutines
 #include "exception_handling/Exception_Handling.hpp"
 #include "tests/Coroutine_Tests.h"
 #include "use_cases/Cooperative_Multitasking.hpp"
+#include "frame_custom_allocation/CustomAllocation.hpp"
 
 
 int main([[maybe_unused]] int argc,
@@ -45,7 +46,7 @@ int main([[maybe_unused]] int argc,
     // Simple::Multiple_Awaiters_Resolution::TestAll();
     // Simple::Multiple_Awaiters_Resolution_2::TestAll();
     // Simple::Mutiple_Awaiters_Initiail_Final::TestAll();
-    Simple::Yield_Coroutine::TestAll();
+    // Simple::Yield_Coroutine::TestAll();
     // Simple::Yield_Coroutine_Values_from_List::TestAll();
 
     // Experiments::TestAll();
@@ -59,6 +60,8 @@ int main([[maybe_unused]] int argc,
     // Experiments::TaskCoordination::TestAll();  // <------------- Not working
 
     // Exception_Handling::TestAll();
+
+    custom_allocation::FrameAllocation::TestAll();
 
     // String_to_Integer_Parser::Test();
 

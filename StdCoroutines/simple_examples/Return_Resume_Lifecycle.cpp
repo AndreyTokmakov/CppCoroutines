@@ -20,12 +20,10 @@ namespace
     {
         struct promise_type
         {
-            Task get_return_object()
-            {
+            [[nodiscard]]
+            Task get_return_object() noexcept {
                 std::cout << "Creating return object" << std::endl;
-                return Task{
-                    std::coroutine_handle<promise_type>::from_promise(*this)
-                };
+                return Task { *this };
             }
 
             std::suspend_always initial_suspend()
@@ -46,7 +44,8 @@ namespace
 
         std::coroutine_handle<promise_type> handle;
 
-        explicit Task(const std::coroutine_handle<promise_type> h) : handle(h) {
+        explicit Task(promise_type& promise) :
+           handle { std::coroutine_handle<promise_type>::from_promise(promise) } {
         }
 
         ~Task()
