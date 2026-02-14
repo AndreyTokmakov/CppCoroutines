@@ -105,7 +105,7 @@ namespace
         CoroType::promise_type& promise;
         Event event {};
 
-        EventAwaiter(CoroType::promise_type& promise, Event ent) : promise { promise }, event { ent } {
+        EventAwaiter(CoroType::promise_type& promise, const Event ent) : promise { promise }, event { ent } {
             std::println("[{}] [{}] EventAwaiter::EventAwaiter({})", tid(), time(), event.duration.count());
         }
 
