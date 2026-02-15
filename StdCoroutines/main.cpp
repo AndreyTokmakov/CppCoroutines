@@ -18,6 +18,7 @@ Description : Coroutines
 #include "tests/Coroutine_Tests.h"
 #include "use_cases/Cooperative_Multitasking.hpp"
 #include "frame_custom_allocation/CustomAllocation.hpp"
+#include "networking/Networking.hpp"
 
 
 int main([[maybe_unused]] int argc,
@@ -58,16 +59,13 @@ int main([[maybe_unused]] int argc,
     // Experiments::Generic_TaskBased_Coroutine::TestAll();
     // Experiments::FileReader::TestAll();        // <------------- Not working
     // Experiments::TaskCoordination::TestAll();  // <------------- Not working
-    Experiments::EventLoop_Simulation::TestAll();
+    // Experiments::EventLoop_Simulation::TestAll();
 
+    Networking::EpollCoroutine::TestAll();
     // Exception_Handling::TestAll();
-
     // custom_allocation::FrameAllocation::TestAll();
-
     // String_to_Integer_Parser::Test();
-
     // use_cases::cooperative_multitasking::TestAll();
-
     // CoroutineTests::TestAll();
 
     return EXIT_SUCCESS;
