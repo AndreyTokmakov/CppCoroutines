@@ -58,10 +58,11 @@ int main([[maybe_unused]] int argc,
     // Experiments::Generic_TaskBased_Coroutine::TestAll();
     // Experiments::FileReader::TestAll();        // <------------- Not working
     // Experiments::TaskCoordination::TestAll();  // <------------- Not working
+    Experiments::EventLoop_Simulation::TestAll();
 
     // Exception_Handling::TestAll();
 
-    custom_allocation::FrameAllocation::TestAll();
+    // custom_allocation::FrameAllocation::TestAll();
 
     // String_to_Integer_Parser::Test();
 

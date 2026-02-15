@@ -25,6 +25,7 @@ namespace StdCoroutines::Experiments
     namespace State_Machine_Simple { void TestAll();}
     namespace FileReader { void TestAll(); }
     namespace TaskCoordination { void TestAll(); }
+    namespace EventLoop_Simulation { void TestAll(); }
 }
 
 #endif //CPPCOROUTINES_EXPERIMENTS_H

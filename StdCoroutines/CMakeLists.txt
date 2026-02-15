@@ -30,6 +30,7 @@ add_executable(${PROJECT_NAME}
         experiments/Event_Processor.cpp
         experiments/State_Machine_Simple.cpp
         experiments/Waitable_Coroutine_With_Mutex.cpp
+        experiments/EventLoop_Simulation.cpp
 
         simple_examples/Coroutine_Lifecycle_CoReturn.cpp
         simple_examples/Coroutine_Lifecycle_CoAwait.cpp
