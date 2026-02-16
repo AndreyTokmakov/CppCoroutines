@@ -92,13 +92,11 @@ namespace
             epoll_event event { .events = numEvents };
             event.data.fd = fd;
 
-            // TODO: Fixme --> find
-            if (!handlers.contains(fd)) {
+            if (auto [ itCoro, newInserted] = handlers.emplace(fd, hCoro); newInserted) {
                 ::epoll_ctl(epollFd, EPOLL_CTL_ADD, fd, &event);
             } else {
                 ::epoll_ctl(epollFd, EPOLL_CTL_MOD, fd, &event);
             }
-            handlers[fd] = hCoro;
         }
 
     private:
