@@ -11,12 +11,13 @@ Description : Networking.cpp
 
 #include "Utilities.h"
 #include <coroutine>
+#include <utility>
 
 #include <iostream>
 #include <syncstream>
 #include <print>
 
-#include <queue>
+#include <array>
 #include <unordered_map>
 
 #include <fcntl.h>
@@ -68,10 +69,10 @@ namespace
 
         void run()
         {
-            epoll_event events[maxEvents] {};
+            std::array<epoll_event, maxEvents> events{};
             while (true)
             {
-                const int numEvents = ::epoll_wait(epollFd, events, maxEvents, -1);
+                const int numEvents = ::epoll_wait(epollFd, events.data(), maxEvents, -1);
                 for (int i = 0; i < numEvents; ++i) { /** std::for_each_n **/
                     const Handle fd = events[i].data.fd;
                     if (auto it = handlers.find(fd); handlers.end() != it) {
