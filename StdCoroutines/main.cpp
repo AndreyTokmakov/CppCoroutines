@@ -61,7 +61,9 @@ int main([[maybe_unused]] int argc,
     // Experiments::TaskCoordination::TestAll();  // <------------- Not working
     // Experiments::EventLoop_Simulation::TestAll();
 
-    Networking::EpollCoroutine::TestAll();
+    // Networking::EpollCoroutine::TestAll();
+    Networking::EpollCoroutine_2::TestAll();
+
     // Exception_Handling::TestAll();
     // custom_allocation::FrameAllocation::TestAll();
     // String_to_Integer_Parser::Test();

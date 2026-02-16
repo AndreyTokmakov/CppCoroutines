@@ -177,8 +177,10 @@ namespace example_one
             LOG << "Connection request " << clientFd << std::endl;
             if (clientFd >= 0)
                 return true;
-            if (errno == EAGAIN || errno == EWOULDBLOCK)
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                LOG << "errno == EAGAIN || errno == EWOULDBLOCK"<< std::endl;
                 return false;
+            }
             perror("accept");
             return true;
         }

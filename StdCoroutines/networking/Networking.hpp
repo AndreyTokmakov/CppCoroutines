@@ -13,6 +13,7 @@ Description : Networking.hpp
 namespace StdCoroutines::Networking
 {
     namespace EpollCoroutine { void TestAll(); };
+    namespace EpollCoroutine_2 { void TestAll(); };
 }
 
 #endif //CPPCOROUTINES_NETWORKING_HPP

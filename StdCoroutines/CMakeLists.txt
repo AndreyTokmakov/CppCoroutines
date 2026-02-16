@@ -53,6 +53,7 @@ add_executable(${PROJECT_NAME}
         simple_examples/Awaiter_and_Awaitable.cpp
 
         networking/EpollCoroutine.cpp
+        networking/EpollCoroutine_2.cpp
 
         exception_handling/Exception_Handling.cpp
 
