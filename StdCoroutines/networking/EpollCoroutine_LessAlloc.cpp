@@ -132,7 +132,9 @@ namespace
         using handle_t = std::coroutine_handle<promise_type>;
 
         explicit Task(promise_type& promise) :
-            handle { std::coroutine_handle<promise_type>::from_promise(promise) } {
+            handle { std::coroutine_handle<promise_type>::from_promise(promise) }
+        {
+            // LOG << "Task created" << std::endl;
         }
 
         Task(Task&& other) noexcept : handle { std::exchange(other.handle, nullptr) } {
@@ -150,8 +152,8 @@ namespace
 
     struct BaseOp
     {
-        std::coroutine_handle<> handle;
         Handle fd { invalidHandle };
+        std::coroutine_handle<> handle;
 
         void resume() const
         {
@@ -165,12 +167,9 @@ namespace
         size_t size { 0 };
         ssize_t bytesRead { invalidHandle };
 
-        // TODO: Refactor -> use BaseOp ctor
-        AsyncRead(const Handle fd, char* buff, const size_t sz)
+        AsyncRead(const Handle fd, char* buff, const size_t size):
+            BaseOp { fd }, buffer { buff },  size { size }
         {
-            this->fd = fd;
-            buffer = buff;
-            size = sz;
         }
 
         bool await_ready()
@@ -201,23 +200,21 @@ namespace
     struct AsyncWrite: BaseOp
     {
         const char* buffer { nullptr };
-        size_t size { 0 };
-        ssize_t written { invalidHandle };
+        size_t  sizeToWrite { 0 };
+        ssize_t bytesWritten { invalidHandle };
 
-        // TODO: Refactor -> use BaseOp ctor
-        AsyncWrite(const Handle fd, const char* buff, const size_t sz)
+        AsyncWrite(const Handle fd, const char* buff, const size_t size):
+            BaseOp { fd }, buffer { buff }, sizeToWrite { size }
         {
-            this->fd = fd;
-            buffer = buff;
-            size = sz;
+            // LOG << "AsyncWrite {size: " << size << "}" << std::endl;
         }
 
         bool await_ready()
         {
-            const ssize_t n = ::write(fd, buffer, size);
-            if (n > 0) {
-                written = n;
-                return written == size;
+            const ssize_t wBytes = ::write(fd, buffer, sizeToWrite);
+            if (wBytes > 0) {
+                bytesWritten = wBytes;
+                return bytesWritten == sizeToWrite;
             }
             return errno != EAGAIN;
         }
@@ -230,10 +227,10 @@ namespace
 
         void await_resume()
         {
-            while (size > written) {
-                const ssize_t n = ::write(fd, buffer + written, size - written);
-                if (n > 0) {
-                    written += n;
+            while (sizeToWrite > bytesWritten) {
+                const ssize_t wBytes = ::write(fd, buffer + bytesWritten, sizeToWrite - bytesWritten);
+                if (wBytes > 0) {
+                    bytesWritten += wBytes;
                 }
                 return;
             }
