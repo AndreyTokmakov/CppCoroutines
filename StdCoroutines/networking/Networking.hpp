@@ -15,6 +15,7 @@ namespace StdCoroutines::Networking
     namespace EpollCoroutine { void TestAll(); };
     namespace EpollCoroutine_1_Ex { void TestAll(); };
     namespace EpollCoroutine_2 { void TestAll(); };
+    namespace EpollCoroutine_LessAlloc { void TestAll(); };
 }
 
 #endif //CPPCOROUTINES_NETWORKING_HPP

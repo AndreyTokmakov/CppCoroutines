@@ -55,6 +55,7 @@ add_executable(${PROJECT_NAME}
         networking/EpollCoroutine.cpp
         networking/EpollCoroutine_1_Ex.cpp
         networking/EpollCoroutine_2.cpp
+        networking/EpollCoroutine_LessAlloc.cpp
 
         exception_handling/Exception_Handling.cpp
 
