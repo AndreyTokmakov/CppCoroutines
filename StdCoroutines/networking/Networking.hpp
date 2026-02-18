@@ -12,10 +12,11 @@ Description : Networking.hpp
 
 namespace StdCoroutines::Networking
 {
-    namespace EpollCoroutine { void TestAll(); };
-    namespace EpollCoroutine_1_Ex { void TestAll(); };
-    namespace EpollCoroutine_2 { void TestAll(); };
-    namespace EpollCoroutine_LessAlloc { void TestAll(); };
+    namespace EpollCoroutine { void TestAll(); }
+    namespace EpollCoroutine_1_Ex { void TestAll(); }
+    namespace EpollCoroutine_2 { void TestAll(); }
+    namespace EpollCoroutine_LessAlloc { void TestAll(); }
+    namespace URingCoroutine { void TestAll(); }
 }
 
 #endif //CPPCOROUTINES_NETWORKING_HPP

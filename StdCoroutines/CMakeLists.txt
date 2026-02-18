@@ -10,6 +10,9 @@ add_compile_options(-c -Wall -O3 -std=c++26)
 set(UTILS_LIBRARY_DIR "${CMAKE_SOURCE_DIR}/Utilities")
 set(UTILS_BINARY_DIR  "${CMAKE_BINARY_DIR}/Utilities")
 
+include_directories(${THIRD_PARTY_DIR}/liburing/install_dir/include)
+link_directories(${THIRD_PARTY_DIR}/liburing/install_dir/lib)
+
 # message("CMAKE_SOURCE_DIR       : ${CMAKE_SOURCE_DIR}")
 # message("UTILS_LIBRARY_DIR      : ${UTILS_LIBRARY_DIR}")
 # message("PROJECT_SOURCE_DIR     : ${PROJECT_SOURCE_DIR}")
@@ -56,6 +59,7 @@ add_executable(${PROJECT_NAME}
         networking/EpollCoroutine_1_Ex.cpp
         networking/EpollCoroutine_2.cpp
         networking/EpollCoroutine_LessAlloc.cpp
+        networking/URingCoroutine.cpp
 
         exception_handling/Exception_Handling.cpp
 
@@ -72,5 +76,6 @@ target_link_directories(${PROJECT_NAME} PUBLIC ${UTILS_BINARY_DIR})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}
         utils
         pthread
+        uring
         ${EXTRA_LIBS}
 )

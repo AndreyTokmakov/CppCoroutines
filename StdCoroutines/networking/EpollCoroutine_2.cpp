@@ -1,5 +1,5 @@
 /**============================================================================
-Name        : EpollCoroutine.cpp.cpp
+Name        : EpollCoroutine.cpp
 Created on  : 15.02.2026
 Author      : Andrei Tokmakov
 Version     : 1.0

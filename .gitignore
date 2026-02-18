@@ -34,13 +34,13 @@
 # Executables
 *callgrind.out.*
 
-
+# Build dirs:
+/build*
 /cmake-build-debug*
 /cmake-build-release*
-/FinTechMarketProjects/data/*
-/FuzzingExperiments/fuzzer
-/FuzzingExperiments/crash*
+
+# IDE:
 .idea/
-test_bin
+
 
 

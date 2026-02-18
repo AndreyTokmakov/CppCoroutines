@@ -1,10 +1,10 @@
 /**============================================================================
-Name        : URingCoroutine.cpp.cpp
+Name        : EpollCoroutine_LessAlloc.cpp
 Created on  : 16.02.2026
 Author      : Andrei Tokmakov
 Version     : 1.0
 Copyright   : Your copyright notice
-Description : URingCoroutine.cpp
+Description : EpollCoroutine_LessAlloc.cpp
 ============================================================================**/
 
 #include "Networking.hpp"
