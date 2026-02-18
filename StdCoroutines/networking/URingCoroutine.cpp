@@ -33,7 +33,7 @@ Description : URingCoroutine.cpp
 namespace
 {
     using Handle = int;
-    constexpr Handle invalidHandle { -1 };
+    constexpr Handle  invalidHandle { -1 };
     constexpr uint16_t bufferSize { 1024 * 4 };
     constexpr uint16_t queueDepth { 256 };
 
@@ -62,8 +62,7 @@ namespace
 
     struct Task
     {
-        // TODO: using
-        struct promise_type
+        struct Promise
         {
             Task get_return_object() {
                 return Task { *this };
@@ -85,14 +84,13 @@ namespace
             }
         };
 
-        ///using promise_type = Promise;
-
+        using promise_type = Promise;
         using handle_t = std::coroutine_handle<promise_type>;
 
         explicit Task(promise_type& promise) :
             handle { std::coroutine_handle<promise_type>::from_promise(promise) }
         {
-            // LOG << "Task created" << std::endl;
+            LOG << "Task created" << std::endl;
         }
 
         Task(Task&& other) noexcept : handle { std::exchange(other.handle, nullptr) } {
@@ -110,13 +108,14 @@ namespace
 
     struct AsyncWrite: Operation
     {
-        int fd { invalidHandle };
+        Handle fd { invalidHandle };
         const char* buffer { nullptr };
         size_t size { 0 };
 
-        AsyncWrite(const int fd, const char* buff, const size_t size):
+        AsyncWrite(const Handle fd, const char* buff, const size_t size):
             fd { fd }, buffer { buff } ,size { size }
         {
+            LOG << "AsyncWrite {size: " << size << "}" << std::endl;
         }
 
         bool await_ready() const noexcept {
@@ -139,15 +138,16 @@ namespace
 
     struct AsyncRead: Operation
     {
-        int fd { invalidHandle };
+        Handle fd { invalidHandle };
         char* buffer { nullptr };
         size_t size { 0 };
 
-        AsyncRead(const int fd, char* buff, const size_t size):
+        AsyncRead(const Handle fd, char* buff, const size_t size):
             fd { fd }, buffer { buff } ,size { size }
         {
         }
 
+        [[nodiscard]]
         bool await_ready() const noexcept {
             return false;
         }
@@ -161,6 +161,7 @@ namespace
             io_uring_submit(&ring);
         }
 
+        [[nodiscard]]
         ssize_t await_resume() const noexcept {
             return result;
         }
@@ -168,11 +169,11 @@ namespace
 
     struct AsyncAccept:  Operation
     {
-        int serverFd { invalidHandle };
+        Handle serverFd { invalidHandle };
         sockaddr_in address {};
         socklen_t len { sizeof(address) };
 
-        explicit AsyncAccept(const int fd): serverFd { fd } {
+        explicit AsyncAccept(const Handle fd): serverFd { fd } {
         }
 
         bool await_ready() const noexcept {
@@ -188,13 +189,12 @@ namespace
             io_uring_submit(&ring);
         }
 
-        // HANDLE
         int await_resume() const noexcept {
             return result;
         }
     };
 
-    Task handleClient(const int clientFd)
+    Task handleClient(const Handle clientFd)
     {
         std::array<char, bufferSize> buffer {};
         while (true)
