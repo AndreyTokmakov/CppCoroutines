@@ -65,7 +65,9 @@ int main([[maybe_unused]] int argc,
     // Networking::EpollCoroutine_1_Ex::TestAll();
     // Networking::EpollCoroutine_2::TestAll();
     // Networking::EpollCoroutine_LessAlloc::TestAll();
-    Networking::URingCoroutine::TestAll();
+    // Networking::URingCoroutine::TestAll();
+    Networking::URingCoroutine_2::TestAll();
+    // Networking::Experiments::TestAll();
 
     // Exception_Handling::TestAll();
     // custom_allocation::FrameAllocation::TestAll();
