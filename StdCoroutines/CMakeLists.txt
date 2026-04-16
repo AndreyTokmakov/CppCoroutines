@@ -63,6 +63,8 @@ add_executable(${PROJECT_NAME}
         networking/URingCoroutine_2.cpp
         networking/Experiments.cpp
 
+        scheduling/SimpleExample.cpp
+
         exception_handling/Exception_Handling.cpp
 
         use_cases/Cooperative_Multitasking.cpp

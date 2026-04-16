@@ -202,7 +202,7 @@ namespace
             return false;
         }
 
-        void await_suspend(std::coroutine_handle<> hCoro)
+        void await_suspend(const std::coroutine_handle<> hCoro)
         {
             op.handle = hCoro;
             auto* sqe = io_uring_get_sqe(&ring);
