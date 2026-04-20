@@ -63,7 +63,7 @@ namespace StdCoroutines::Generators::Simple_Generator
                 return {};
             }
 
-            std::suspend_always yield_value(int v) {
+            std::suspend_always yield_value(const int v) {
                 value = v;
                 return {};
             }
@@ -90,7 +90,7 @@ namespace StdCoroutines::Generators::Simple_Generator
         std::coroutine_handle<promise_type> handle;
 
 #if 0
-        explicit Generator(std::coroutine_handle<promise_type> h) : handle(h) {
+            explicit Generator(std::coroutine_handle<promise_type> h) : handle(h) {
         }
 #endif
 
@@ -157,6 +157,122 @@ namespace StdCoroutines::Generators::Simple_Generator
         // 3
         // 4
         // 5
+    }
+}
+
+namespace StdCoroutines::Generators::Simple_Generator_2
+{
+    template <typename T>
+    struct Generator
+    {
+        using value_type = T;
+
+        struct promise_type
+        {
+            Generator get_return_object() {
+                return Generator { std::coroutine_handle<promise_type>::from_promise(*this) };
+            }
+
+            // Suspend immediately -- don't run the body until asked
+            [[nodiscard]]
+            std::suspend_always initial_suspend() const noexcept {
+                return {};
+            }
+
+            // Suspend at the end -- let the Generator destructor clean up
+            [[nodiscard]]
+            std::suspend_always final_suspend() const noexcept {
+                return {};
+            }
+
+            // When the coroutine does: co_yield value;
+            std::suspend_always yield_value(T value)
+            {
+                current_value = std::move(value);
+                return {};
+            }
+
+            // Our generator doesn't return a final value, just yields
+            void return_void() {
+            }
+
+            // If something throws inside the coroutine body
+            void unhandled_exception() {
+                std::terminate(); // Nuclear option. You can rethrow instead.
+            }
+
+            [[nodiscard]]
+            value_type getStoredValue() const noexcept {
+                return current_value;
+            }
+
+        private:
+            value_type current_value;
+        };
+
+        explicit Generator(std::coroutine_handle<promise_type> handle): handle(handle) {
+        }
+
+        ~Generator()
+        {
+            if (handle) {
+                handle.destroy();
+            }
+        }
+
+        // No copying! The handle is a unique resource.
+        Generator(const Generator&) = delete;
+        Generator& operator=(const Generator&) = delete;
+
+        // Move is fine though
+        Generator(Generator&& other) noexcept: handle { std::exchange(other.handle, nullptr) }  {
+        }
+
+        Generator& operator=(Generator&& other) noexcept
+        {
+            if (this != &other)
+            {
+                if (handle) {
+                    handle.destroy();
+                }
+                handle = std::exchange(other.handle, nullptr);
+            }
+            return *this;
+        }
+
+        // Advance to the next value. Returns false if done.
+        bool next()
+        {
+            if (!handle || handle.done())
+                return false;
+            handle.resume();
+            return !handle.done();
+        }
+
+        // Get the current yielded value
+        [[nodiscard]]
+        value_type value() const {
+            return handle.promise().getStoredValue();
+        }
+
+    private:
+        std::coroutine_handle<promise_type> handle;
+    };
+
+    Generator<int> count_up_to(const int max)
+    {
+        for (int i = 1; i <= max; ++i) {
+            co_yield i;
+        }
+    }
+
+    void demo()
+    {
+        Generator<int>  gen = count_up_to(5);
+        while (gen.next()) {
+            std::cout << gen.value() << " ";
+        }
+        // 1 2 3 4 5
     }
 }
 
@@ -679,10 +795,12 @@ namespace StdCoroutines::Generators::Generic_Generator_ExcHandler
 void StdCoroutines::Generators::TestAll()
 {
     // SimpleExample::printLetters();
+
     // Simple_Generator::demo();
+    Simple_Generator_2::demo();
 
     // Generic_Generator_ExcHandler::demo();
-    Generic_Generator_ExcHandler::handleExceptionDemo();
+    // Generic_Generator_ExcHandler::handleExceptionDemo();
 
     // Fibonacci_Sequence_Generator::Test();
     // Fibonacci_Sequence_Generator_Ex::Test();

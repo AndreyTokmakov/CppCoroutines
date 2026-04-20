@@ -27,7 +27,7 @@ int main([[maybe_unused]] const int argc,
     const std::vector<std::string_view> args(argv + 1, argv + argc);
     using namespace StdCoroutines;
 
-    // Generators::TestAll();
+    Generators::TestAll();
 
     // Simple::Coroutine_Lifecycle_CoAwait::TestAll();
     // Simple::Coroutine_Lifecycle_CoReturn::TestAll();
@@ -68,7 +68,7 @@ int main([[maybe_unused]] const int argc,
     // Networking::URingCoroutine_2::TestAll();
     // Networking::Experiments::TestAll();
 
-    ScheduleCoroutines::SimpleExample::TestAll();
+    // ScheduleCoroutines::SimpleExample::TestAll();
 
     // Exception_Handling::TestAll();
     // custom_allocation::FrameAllocation::TestAll();
