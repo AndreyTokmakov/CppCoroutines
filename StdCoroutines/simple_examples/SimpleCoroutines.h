@@ -25,8 +25,11 @@ namespace StdCoroutines::Simple
     namespace Return_Resume_Example { void TestAll(); }
 
     namespace Resuming_Coroutine_1 { void TestAll(); }
+
+    namespace Awaitable_Sleep { void TestAll(); }
     namespace Awaiter_and_Awaitable { void TestAll(); }
     namespace Awaiter_Lifecycle_Steps { void TestAll(); }
+
     namespace Waitable_Coroutine { void TestAll(); }
     namespace Waitable_Coroutine_2 { void TestAll(); }
     namespace Waitable_Coroutine_Update_Promise_State { void TestAll(); }

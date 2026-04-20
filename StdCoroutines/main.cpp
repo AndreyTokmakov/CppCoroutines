@@ -27,7 +27,7 @@ int main([[maybe_unused]] const int argc,
     const std::vector<std::string_view> args(argv + 1, argv + argc);
     using namespace StdCoroutines;
 
-    Generators::TestAll();
+    // Generators::TestAll();
 
     // Simple::Coroutine_Lifecycle_CoAwait::TestAll();
     // Simple::Coroutine_Lifecycle_CoReturn::TestAll();
@@ -39,6 +39,7 @@ int main([[maybe_unused]] const int argc,
     // Simple::Return_Resume_Example::TestAll();
 
     // Simple::Resuming_Coroutine_1::TestAll();
+    Simple::Awaitable_Sleep::TestAll();
     // Simple::Awaiter_and_Awaitable::TestAll();
     // Simple::Waitable_Coroutine::TestAll();
     // Simple::Waitable_Coroutine_2::TestAll();

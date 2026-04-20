@@ -54,6 +54,7 @@ add_executable(${PROJECT_NAME}
         simple_examples/Yield_Coroutine_Values_from_List.cpp
         simple_examples/Awaiter_Lifecycle_Steps.cpp
         simple_examples/Awaiter_and_Awaitable.cpp
+        simple_examples/Awaitable_Sleep.cpp
 
         networking/EpollCoroutine.cpp
         networking/EpollCoroutine_1_Ex.cpp
