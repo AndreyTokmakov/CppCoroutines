@@ -7,7 +7,7 @@ Copyright   : Your copyright notice
 Description : Simple Coroutine Waitable
 ============================================================================**/
 
-#include "SimpleCoroutines.h"
+#include "SimpleCoroutines.hpp"
 
 #include <chrono>
 #include <thread>

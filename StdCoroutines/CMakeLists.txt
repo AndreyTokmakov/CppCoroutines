@@ -41,6 +41,7 @@ add_executable(${PROJECT_NAME}
         simple_examples/Resuming_Coroutine_1.cpp
         simple_examples/Returning_Coroutine.cpp
         simple_examples/Returning_Coroutine_2.cpp
+        simple_examples/Returning_Coroutine_3.cpp
         simple_examples/Return_Resume_Lifecycle.cpp
         simple_examples/Return_Resume_Example.cpp
 
@@ -63,6 +64,8 @@ add_executable(${PROJECT_NAME}
         networking/URingCoroutine.cpp
         networking/URingCoroutine_2.cpp
         networking/Experiments.cpp
+
+        threading/ThreadsHopping.cpp
 
         scheduling/SimpleExample.cpp
 

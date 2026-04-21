@@ -7,7 +7,7 @@ Copyright   : Your copyright notice
 Description : Simple Coroutine returning value
 ============================================================================**/
 
-#include "SimpleCoroutines.h"
+#include "SimpleCoroutines.hpp"
 
 namespace
 {

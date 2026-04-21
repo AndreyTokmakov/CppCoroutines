@@ -7,7 +7,7 @@ Copyright   : Your copyright notice
 Description : Yield_Coroutine.h
 ============================================================================**/
 
-#include "SimpleCoroutines.h"
+#include "SimpleCoroutines.hpp"
 
 #include <chrono>
 #include <thread>

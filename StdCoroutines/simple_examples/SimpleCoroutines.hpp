@@ -21,6 +21,7 @@ namespace StdCoroutines::Simple
 
     namespace Returning_Coroutine { void TestAll(); }
     namespace Returning_Coroutine_2 { void TestAll(); }
+    namespace Returning_Coroutine_3 { void TestAll(); }
     namespace Return_Resume_Lifecycle { void TestAll(); }
     namespace Return_Resume_Example { void TestAll(); }
 

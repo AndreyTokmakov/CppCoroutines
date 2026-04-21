@@ -7,7 +7,7 @@ Copyright   : Your copyright notice
 Description :
 ============================================================================**/
 
-#include "SimpleCoroutines.h"
+#include "SimpleCoroutines.hpp"
 #include <thread>
 
 namespace

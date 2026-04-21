@@ -7,7 +7,7 @@ Copyright   : Your copyright notice
 Description : Simple Coroutine lifecycle demo
 ============================================================================**/
 
-#include "SimpleCoroutines.h"
+#include "SimpleCoroutines.hpp"
 
 /**
 Coroutine Functions and Suspension Points
