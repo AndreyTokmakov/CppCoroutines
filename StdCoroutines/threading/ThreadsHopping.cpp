@@ -14,7 +14,8 @@ Description :
 #include <utility>
 #include <thread>
 
-#define LOG std::osyncstream { std::cout } << Utilities::getCurrentTime() << " [" << std::this_thread::get_id() << "] "
+#define LOG std::osyncstream { std::cout } << Utilities::getCurrentTime()  \
+    << " [" << std::this_thread::get_id() << "] "
 
 namespace
 {
