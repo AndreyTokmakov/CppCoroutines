@@ -23,6 +23,7 @@ add_executable(${PROJECT_NAME}
         main.cpp
 
         generators/Generators.cpp
+        generators/Generic_Generator.cpp
 
         experiments/Experiments.cpp
         experiments/Calculating_Average.cpp

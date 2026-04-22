@@ -11,7 +11,7 @@ Description : Coroutines
 #include <vector>
 #include <string_view>
 
-#include "generators/Generators.h"
+#include "generators/Generators.hpp"
 #include "simple_examples/SimpleCoroutines.hpp"
 #include "experiments/Experiments.h"
 #include "exception_handling/Exception_Handling.hpp"
@@ -104,6 +104,7 @@ int main([[maybe_unused]] const int argc,
     using namespace StdCoroutines;
 
     // Generators::TestAll();
+    Generators::Generic_Generator::TestAll();
 
     // Simple::Coroutine_Lifecycle_CoAwait::TestAll();
     // Simple::Coroutine_Lifecycle_CoReturn::TestAll();
@@ -114,7 +115,7 @@ int main([[maybe_unused]] const int argc,
     // Simple::Returning_Coroutine_3::TestAll();
     // Simple::Return_Resume_Lifecycle::TestAll();
     // Simple::Return_Resume_Example::TestAll();
-    Simple::Returning_Coroutine_ComputeResult::TestAll();
+    // Simple::Returning_Coroutine_ComputeResult::TestAll();
 
     // Simple::Resuming_Coroutine_1::TestAll();
     // Simple::Awaitable_Sleep::TestAll();

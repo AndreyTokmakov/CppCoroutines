@@ -9,14 +9,13 @@ Description :
 
 #include "SimpleCoroutines.hpp"
 
-
 #include <iostream>
 #include <syncstream>
 #include <utility>
 #include <thread>
 
 #define LOG std::osyncstream { std::cout } << Utilities::getCurrentTime()  \
-<< " [" << std::this_thread::get_id() << "] "
+    << " [" << std::this_thread::get_id() << "] "
 
 namespace
 {
