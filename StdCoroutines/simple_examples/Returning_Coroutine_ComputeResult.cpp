@@ -93,7 +93,6 @@ namespace
         {
             while (!handle.done()) {
                 handle.resume();
-                // LOG << "Resuming...." << std::boolalpha << handle.done() << std::endl;
             }
         }
 
@@ -112,7 +111,6 @@ namespace
         int sum = 0;
         for (int i = 0; i <= n; ++i) {
             sum += i;
-            // LOG << "sum = " << sum << std::endl;
             co_await std::suspend_always{};
         }
         co_return sum;
@@ -124,7 +122,7 @@ namespace
         computation.run();
 
         if (const std::optional<int> result  = computation.getResult(); result.has_value()) {
-            LOG << "Result() = " << result.has_value() << std::endl;
+            LOG << "Result() = " << result.value() << std::endl;
         }
     }
 }
