@@ -44,6 +44,7 @@ add_executable(${PROJECT_NAME}
         simple_examples/Returning_Coroutine_3.cpp
         simple_examples/Return_Resume_Lifecycle.cpp
         simple_examples/Return_Resume_Example.cpp
+        simple_examples/Returning_Coroutine_ComputeResult.cpp
 
         simple_examples/Waitable_Coroutine.cpp
         simple_examples/Waitable_Coroutine_2.cpp

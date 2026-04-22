@@ -114,6 +114,7 @@ int main([[maybe_unused]] const int argc,
     // Simple::Returning_Coroutine_3::TestAll();
     // Simple::Return_Resume_Lifecycle::TestAll();
     // Simple::Return_Resume_Example::TestAll();
+    Simple::Returning_Coroutine_ComputeResult::TestAll();
 
     // Simple::Resuming_Coroutine_1::TestAll();
     // Simple::Awaitable_Sleep::TestAll();
@@ -146,7 +147,7 @@ int main([[maybe_unused]] const int argc,
     // Networking::URingCoroutine_2::TestAll();
     // Networking::Experiments::TestAll();
 
-    Threading::ThreadsHopping::TestAll();
+    // Threading::ThreadsHopping::TestAll();
 
     // ScheduleCoroutines::SimpleExample::TestAll();
 
