@@ -54,8 +54,9 @@ namespace
                 return {};
             }
 
-            std::suspend_always yield_value(T value) {
-                current_value = std::move(value);
+            template<typename U>
+            std::suspend_always yield_value(U&& value) {
+                current_value = std::forward<U>(value);
                 return {};
             }
 
@@ -80,17 +81,22 @@ namespace
         }
 
         [[nodiscard]]
-        bool next() const
+        bool next()
         {
             if (!coroHandle || coroHandle.done()) {
                 return false;
             }
             coroHandle.resume();
+
+            if (coroHandle.promise().exception) {
+                std::rethrow_exception(coroHandle.promise().exception);
+            }
+
             return !coroHandle.done();
         }
 
         [[nodiscard]]
-        value_type value() {
+        const value_type& value() const {
             return coroHandle.promise().current_value;
         }
     };
