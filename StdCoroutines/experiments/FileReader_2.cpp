@@ -127,7 +127,6 @@ namespace
             std::cout << "\n";
         }
     }
-
 }
 
 void StdCoroutines::Experiments::FileReader_2::TestAll()
