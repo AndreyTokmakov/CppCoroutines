@@ -24,6 +24,7 @@ namespace StdCoroutines::Experiments
     namespace Event_Processor { void TestAll(); }
     namespace State_Machine_Simple { void TestAll();}
     namespace FileReader { void TestAll(); }
+    namespace FileReader_2 { void TestAll(); }
     namespace TaskCoordination { void TestAll(); }
     namespace EventLoop_Simulation { void TestAll(); }
 }

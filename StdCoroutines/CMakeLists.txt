@@ -30,6 +30,7 @@ add_executable(${PROJECT_NAME}
         experiments/PinBall_Game.cpp
         experiments/Generic_TaskBased_Coroutine.cpp
         experiments/FileReader.cpp
+        experiments/FileReader_2.cpp
         experiments/TaskCoordination.cpp
         experiments/Event_Processor.cpp
         experiments/State_Machine_Simple.cpp

@@ -104,7 +104,7 @@ int main([[maybe_unused]] const int argc,
     using namespace StdCoroutines;
 
     // Generators::TestAll();
-    Generators::Generic_Generator::TestAll();
+    // Generators::Generic_Generator::TestAll();
 
     // Simple::Coroutine_Lifecycle_CoAwait::TestAll();
     // Simple::Coroutine_Lifecycle_CoReturn::TestAll();
@@ -137,6 +137,7 @@ int main([[maybe_unused]] const int argc,
     // Experiments::State_Machine_Simple::TestAll();
     // Experiments::Generic_TaskBased_Coroutine::TestAll();
     // Experiments::FileReader::TestAll();        // <------------- Not working
+    Experiments::FileReader_2::TestAll();        // <------------- Not working
     // Experiments::TaskCoordination::TestAll();  // <------------- Not working
     // Experiments::EventLoop_Simulation::TestAll();
 
