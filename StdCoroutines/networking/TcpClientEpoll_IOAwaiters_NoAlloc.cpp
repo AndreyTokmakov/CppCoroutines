@@ -323,7 +323,7 @@ namespace
         co_await AsyncConnect { reactor, ctx, addr };
 
         constexpr std::string_view msg { "hello1" };
-        co_await AsyncSend{reactor, ctx, msg.data(), msg.size() };
+        co_await AsyncSend { reactor, ctx, msg.data(), msg.size() };
 
         std::array<char, 1024> buf {};
         const ssize_t n = co_await AsyncRecv { reactor, ctx, buf.data(), buf.size() };
