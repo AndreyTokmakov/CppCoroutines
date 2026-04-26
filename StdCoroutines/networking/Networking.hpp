@@ -23,6 +23,7 @@ namespace StdCoroutines::Networking
     namespace TcpClientEpoll { void TestAll(); }
     namespace TcpClientEpoll_2 { void TestAll(); }
     namespace TcpClientEpoll_IOAwaiters { void TestAll(); }
+    namespace TcpClientEpoll_IOAwaiters_NoAlloc { void TestAll(); }
 }
 
 #endif //CPPCOROUTINES_NETWORKING_HPP

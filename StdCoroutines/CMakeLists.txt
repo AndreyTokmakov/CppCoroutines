@@ -70,6 +70,7 @@ add_executable(${PROJECT_NAME}
         networking/TcpClientEpoll.cpp
         networking/TcpClientEpoll_NoHeap.cpp
         networking/TcpClientEpoll_IOAwaiters.cpp
+        networking/TcpClientEpoll_IOAwaiters_NoAlloc.cpp
 
         threading/ThreadsHopping.cpp
 

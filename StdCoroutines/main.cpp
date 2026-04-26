@@ -150,7 +150,8 @@ int main([[maybe_unused]] const int argc,
     // Networking::Experiments::TestAll();
     // Networking::TcpClientEpoll::TestAll();
     // Networking::TcpClientEpoll_2::TestAll();
-    Networking::TcpClientEpoll_IOAwaiters::TestAll();
+    // Networking::TcpClientEpoll_IOAwaiters::TestAll();
+    Networking::TcpClientEpoll_IOAwaiters_NoAlloc::TestAll();
 
     // Threading::ThreadsHopping::TestAll();
 

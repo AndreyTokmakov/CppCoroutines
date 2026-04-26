@@ -1,5 +1,5 @@
 /**============================================================================
-Name        : TcpClientEpoll_IOAwaiters.cpp
+Name        : TcpClientEpoll_IOAwaiters_NoAlloc.cpp
 Created on  :
 Author      : Andrei Tokmakov
 Version     : 1.0
@@ -30,6 +30,7 @@ Description :
 namespace
 {
     using Handle = int32_t;
+    using size_type = uint32_t;
     constexpr Handle InvalidHandle { -1 };
 
     Handle seNonBlocking(const Handle sock)
@@ -68,10 +69,19 @@ namespace
 
 namespace
 {
-
-    struct EpollLoop
+    struct FdContext
     {
-        EpollLoop()
+        Handle fd { InvalidHandle };
+        uint32_t events { 0 };
+        std::coroutine_handle<> coroHandle {};
+    };
+
+    struct Reactor
+    {
+        Handle fdEpoll { InvalidHandle };
+        constexpr static uint16_t maxEvents { 128 };
+
+        Reactor()
         {
             fdEpoll = ::epoll_create1(0);
             if (InvalidHandle == fdEpoll) {
@@ -79,44 +89,44 @@ namespace
             }
         }
 
-        ~EpollLoop()
+        ~Reactor()
         {
             if (InvalidHandle != fdEpoll) {
                 ::close(fdEpoll);
             }
         }
 
-        void addOrModify(const Handle fd, const uint32_t events, const std::coroutine_handle<> hCoro)
+        void add(FdContext* ctx, const uint32_t ev)
         {
-            epoll_event ev {.events = events, .data = epoll_data_t { .fd =  fd}};
-            handlers[fd] = hCoro;
+            ctx->events = ev;
+            epoll_event e{};
+            e.events = ev;
+            e.data.ptr = ctx;
 
-            if (InvalidHandle == ::epoll_ctl(fdEpoll, EPOLL_CTL_ADD, fd, &ev))
+            if (::epoll_ctl(fdEpoll, EPOLL_CTL_ADD, ctx->fd, &e) < 0)
             {
                 if (errno == EEXIST)
                 {
-                    if (InvalidHandle == ::epoll_ctl(fdEpoll, EPOLL_CTL_MOD, fd, &ev)) {
-                        throw std::runtime_error("epoll_ctl MOD failed");
+                    if (::epoll_ctl(fdEpoll, EPOLL_CTL_MOD, ctx->fd, &e) < 0) {
+                        throw std::runtime_error("epoll mod");
                     }
                 } else {
-                    throw std::runtime_error("epoll_ctl ADD failed");
+                    throw std::runtime_error("epoll add");
                 }
             }
         }
 
-        void modify(const Handle fd, const uint32_t events, const std::coroutine_handle<> hCoro)
+        void mod(FdContext* ctx, const uint32_t ev)
         {
-            epoll_event ev {.events = events, .data = epoll_data_t { .fd =  fd}};
-            handlers[fd] = hCoro;
-            if (InvalidHandle == ::epoll_ctl(fdEpoll, EPOLL_CTL_MOD, fd, &ev)) {
+            ctx->events = ev;
+            epoll_event event { .events = ev, .data = epoll_data_t { .ptr = ctx }};
+            if (InvalidHandle == ::epoll_ctl(fdEpoll, EPOLL_CTL_MOD, ctx->fd, &event)) {
                 throw std::runtime_error("epoll_ctl MOD failed");
             }
         }
 
-        void remove(const Handle fd)
-        {
-            ::epoll_ctl(fdEpoll, EPOLL_CTL_DEL, fd, nullptr);
-            handlers.erase(fd);
+        void del(const FdContext* ctx) {
+            ::epoll_ctl(fdEpoll, EPOLL_CTL_DEL, ctx->fd, nullptr);
         }
 
         void run()
@@ -134,22 +144,18 @@ namespace
                 }
                 for (int i = 0; i < eventsCount; ++i)
                 {
-                    const Handle fd = events[i].data.fd;
-                    if (auto it = handlers.find(fd); it != handlers.end()) {
-                        const std::coroutine_handle<> hCoro = it->second;
-                        handlers.erase(it);
-                        hCoro.resume();
+                    FdContext* ctx = static_cast<FdContext*>(events[i].data.ptr);
+                    if (events[i].events & (EPOLLERR | EPOLLHUP))
+                    {
+                        ctx->coroHandle.resume();
+                        continue;
                     }
+                    const std::coroutine_handle<> hCoro = ctx->coroHandle;
+                    ctx->coroHandle = nullptr;
+                    hCoro.resume();
                 }
             }
         }
-
-    private:
-
-        constexpr static uint16_t maxEvents { 64 };
-
-        Handle fdEpoll { InvalidHandle };
-        std::unordered_map<int, std::coroutine_handle<>> handlers;
     };
 
     template<typename T = void>
@@ -164,7 +170,7 @@ namespace
         struct Promise
         {
             Task get_return_object() {
-                return Task{
+                return Task {
                     std::coroutine_handle<Promise>::from_promise(*this)
                 };
             }
@@ -185,125 +191,122 @@ namespace
             }
         };
 
-        std::coroutine_handle<Promise> handle;
+        std::coroutine_handle<Promise> handle { nullptr };
 
         explicit Task(const std::coroutine_handle<Promise> hCoro) : handle(hCoro) {
         }
     };
 
-    struct AsyncConnect
-    {
-        EpollLoop& loop;
-        int sock;
-        sockaddr_in addr;
-
-        bool await_ready()
-        {
-            if (const int res = ::connect(sock, reinterpret_cast<sockaddr *>(&addr), sizeof(addr)); res == 0) {
-                return true;
-            }
-            if (errno == EINPROGRESS) {
-                return false;
-            }
-
-            throw std::runtime_error("connect failed");
-        }
-
-        void await_suspend(const std::coroutine_handle<> hCoro) {
-            loop.addOrModify(sock, EPOLLOUT, hCoro);
-        }
-
-        void await_resume()
-        {
-            int err = 0;
-            socklen_t len = sizeof(err);
-
-            if (getsockopt(sock, SOL_SOCKET, SO_ERROR, &err, &len) < 0 || err != 0) {
-                throw std::runtime_error("connect completion failed");
-            }
-        }
-    };
-
     struct AsyncRecv
     {
-        EpollLoop& loop;
-        Handle sock { InvalidHandle };
-        void* buffer;
+        Reactor& reactor;
+        FdContext& ctx;
+        char* ptrBuffer { nullptr };
         size_t len { 0 };
+        ssize_t total { 0 };
 
-        bool await_ready()
-        {
-            if (const ssize_t result = ::recv(sock, buffer, len, 0); result >= 0) {
-                return true;
-            }
-            if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                return false;
-            }
-            throw std::runtime_error("recv failed");
+        bool await_ready() {
+            return false;
         }
 
-        void await_suspend(const std::coroutine_handle<> hCoro) {
-            loop.addOrModify(sock, EPOLLIN, hCoro);
+        void await_suspend(const std::coroutine_handle<> hCoro)
+        {
+            ctx.coroHandle = hCoro;
+            reactor.add(&ctx, EPOLLIN);
         }
 
         ssize_t await_resume()
         {
-            if (const ssize_t result  = ::recv(sock, buffer, len, 0); result < 0) {
-                throw std::runtime_error("recv after epoll failed");
-            }
-            else {
-                return result;
+            while (true)
+            {
+                if (const ssize_t bytes = recv(ctx.fd, ptrBuffer + total, len - total, 0); bytes > 0) {
+                    total += bytes;
+                    continue;
+                }
+                else if (bytes == 0) {
+                    return total;
+                }
+                if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                    return total;
+                }
+                throw std::runtime_error("recv");
             }
         }
     };
 
     struct AsyncSend
     {
-        EpollLoop& loop;
-        Handle sock { InvalidHandle };
-        const char* buffer;
+        Reactor& reactor;
+        FdContext& ctx;
+        const char* ptrBuffer { nullptr };
         size_t len { 0 };
         size_t offset { 0 };
 
-        bool await_ready()
-        {
-            for (ssize_t bytes = 0; offset < len; ) {
-                bytes = ::send(sock, buffer + offset, len - offset, 0);
-                if (bytes > 0) {
-                    offset += bytes;
-                    continue;
-                }
-                if (bytes == InvalidHandle && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-                    return false;
-                }
-                throw std::runtime_error("send failed");
-            }
-
-            return true;
+        bool await_ready() {
+            return false;
         }
 
         void await_suspend(const std::coroutine_handle<> hCoro) {
-            loop.addOrModify(sock, EPOLLOUT, hCoro);
+            ctx.coroHandle = hCoro;
+            reactor.add(&ctx, EPOLLOUT);
         }
 
-        ssize_t await_resume()
+        size_t await_resume()
         {
-            for (ssize_t bytes = 0; offset < len; ) {
-                bytes = ::send(sock, buffer + offset, len - offset, 0);
-                if (bytes > 0) {
-                    offset += bytes;
+            for (ssize_t bytes = 0; offset < len; offset += bytes)
+            {
+                if (bytes = ::send(ctx.fd, ptrBuffer + offset, len - offset, 0); bytes > 0) {
                     continue;
                 }
-                if (bytes == InvalidHandle && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-                    throw std::runtime_error("still not ready (design issue)");
-                }
-                throw std::runtime_error("send failed");
+                if (errno == EAGAIN || errno == EWOULDBLOCK)
+                    return offset;
+                throw std::runtime_error("send");
             }
             return offset;
         }
     };
 
-    Task<> Client(EpollLoop& loop)
+    // Construct with hostPort ?
+    struct AsyncConnect
+    {
+        Reactor& reactor;
+        FdContext& ctx;
+        sockaddr_in addr;
+
+        bool await_ready()
+        {
+            while (true)
+            {
+                if (const int res = ::connect(ctx.fd, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)); res == 0) {
+                    return true;
+                }
+                if (errno == EINTR) {
+                    continue;
+                }
+                if (errno == EINPROGRESS) {
+                    return false;
+                }
+                throw std::runtime_error("connect");
+            }
+        }
+
+        void await_suspend(const std::coroutine_handle<> hCoro) {
+            ctx.coroHandle = hCoro;
+            reactor.add(&ctx, EPOLLOUT);
+        }
+
+        void await_resume()
+        {
+            int32_t err = 0;
+            socklen_t len = sizeof(err);
+            ::getsockopt(ctx.fd, SOL_SOCKET, SO_ERROR, &err, &len);
+            if (err != 0) {
+                throw std::runtime_error("connect failed");
+            }
+        }
+    };
+
+    Task<> client(Reactor& reactor)
     {
         const Handle sock = ::socket(AF_INET, SOCK_STREAM, 0);
         if (sock < 0) {
@@ -316,21 +319,22 @@ namespace
         sockaddr_in addr { AF_INET, htons(52525)};
         inet_pton(AF_INET, "127.0.0.1", &addr.sin_addr);
 
-        co_await AsyncConnect{loop, sock, addr};
+        FdContext ctx { .fd = sock};
+        co_await AsyncConnect { reactor, ctx, addr };
 
         constexpr std::string_view msg { "hello1" };
-        co_await AsyncSend { loop, sock, msg.data(), msg.size() };
+        co_await AsyncSend{reactor, ctx, msg.data(), msg.size() };
 
         std::array<char, 1024> buf {};
-        const ssize_t n = co_await AsyncRecv{loop, sock, buf.data(), buf.size()};
+        const ssize_t n = co_await AsyncRecv { reactor, ctx, buf.data(), buf.size() };
 
         write(1, buf.data(), n);
     }
 }
 
-void StdCoroutines::Networking::TcpClientEpoll_IOAwaiters::TestAll()
+void StdCoroutines::Networking::TcpClientEpoll_IOAwaiters_NoAlloc::TestAll()
 {
-    EpollLoop loop;
-    Client(loop);
-    loop.run();
+    Reactor reactor;
+    Task task = client(reactor);
+    reactor.run();
 }
