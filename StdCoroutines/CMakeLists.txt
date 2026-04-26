@@ -67,6 +67,9 @@ add_executable(${PROJECT_NAME}
         networking/URingCoroutine.cpp
         networking/URingCoroutine_2.cpp
         networking/Experiments.cpp
+        networking/TcpClientEpoll.cpp
+        networking/TcpClientEpoll_NoHeap.cpp
+        networking/TcpClientEpoll_IOAwaiters.cpp
 
         threading/ThreadsHopping.cpp
 

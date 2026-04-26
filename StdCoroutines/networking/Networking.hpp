@@ -19,6 +19,10 @@ namespace StdCoroutines::Networking
     namespace URingCoroutine { void TestAll(); }
     namespace URingCoroutine_2 { void TestAll(); }
     namespace Experiments { void TestAll(); }
+
+    namespace TcpClientEpoll { void TestAll(); }
+    namespace TcpClientEpoll_2 { void TestAll(); }
+    namespace TcpClientEpoll_IOAwaiters { void TestAll(); }
 }
 
 #endif //CPPCOROUTINES_NETWORKING_HPP

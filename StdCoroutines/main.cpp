@@ -137,7 +137,7 @@ int main([[maybe_unused]] const int argc,
     // Experiments::State_Machine_Simple::TestAll();
     // Experiments::Generic_TaskBased_Coroutine::TestAll();
     // Experiments::FileReader::TestAll();        // <------------- Not working
-    Experiments::FileReader_2::TestAll();        // <------------- Not working
+    // Experiments::FileReader_2::TestAll();        // <------------- Not working
     // Experiments::TaskCoordination::TestAll();  // <------------- Not working
     // Experiments::EventLoop_Simulation::TestAll();
 
@@ -148,6 +148,9 @@ int main([[maybe_unused]] const int argc,
     // Networking::URingCoroutine::TestAll();
     // Networking::URingCoroutine_2::TestAll();
     // Networking::Experiments::TestAll();
+    // Networking::TcpClientEpoll::TestAll();
+    // Networking::TcpClientEpoll_2::TestAll();
+    Networking::TcpClientEpoll_IOAwaiters::TestAll();
 
     // Threading::ThreadsHopping::TestAll();
 
