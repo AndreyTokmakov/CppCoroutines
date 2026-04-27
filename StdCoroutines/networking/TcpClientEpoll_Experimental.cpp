@@ -335,5 +335,6 @@ void StdCoroutines::Networking::TcpClientEpoll_Experimental::TestAll()
 {
     EventLoop loop;
     client(loop);
+    client(loop);
     loop.run();
 }
