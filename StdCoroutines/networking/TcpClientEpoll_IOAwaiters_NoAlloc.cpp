@@ -96,18 +96,15 @@ namespace
             }
         }
 
-        void add(FdContext* ctx, const uint32_t ev)
+        void add(FdContext* ctx, const uint32_t ev) const
         {
             ctx->events = ev;
-            epoll_event e{};
-            e.events = ev;
-            e.data.ptr = ctx;
-
-            if (::epoll_ctl(fdEpoll, EPOLL_CTL_ADD, ctx->fd, &e) < 0)
+            epoll_event event { .events = ev, .data = epoll_data_t { .ptr = ctx }};
+            if (::epoll_ctl(fdEpoll, EPOLL_CTL_ADD, ctx->fd, &event) < 0)
             {
                 if (errno == EEXIST)
                 {
-                    if (::epoll_ctl(fdEpoll, EPOLL_CTL_MOD, ctx->fd, &e) < 0) {
+                    if (::epoll_ctl(fdEpoll, EPOLL_CTL_MOD, ctx->fd, &event) < 0) {
                         throw std::runtime_error("epoll mod");
                     }
                 } else {
@@ -194,6 +191,13 @@ namespace
         std::coroutine_handle<Promise> handle { nullptr };
 
         explicit Task(const std::coroutine_handle<Promise> hCoro) : handle(hCoro) {
+        }
+
+        ~Task()
+        {
+            if (handle) {
+                handle.destroy();
+            }
         }
     };
 
@@ -335,6 +339,10 @@ namespace
 void StdCoroutines::Networking::TcpClientEpoll_IOAwaiters_NoAlloc::TestAll()
 {
     Reactor reactor;
-    Task task = client(reactor);
+
+    std::vector<Task<>> tasks;
+    tasks.push_back(client(reactor));
+    tasks.push_back(client(reactor));
+
     reactor.run();
 }
