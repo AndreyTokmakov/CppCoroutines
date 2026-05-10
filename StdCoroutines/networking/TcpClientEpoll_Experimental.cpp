@@ -28,7 +28,7 @@ Description :
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-
+#define LOG std::osyncstream { std::cout } << Utilities::getCurrentTime() << ' '
 
 namespace
 {
@@ -68,6 +68,29 @@ namespace
         SocketGuard& operator=(const SocketGuard&) = delete;
         SocketGuard& operator=(SocketGuard&&) noexcept = delete;
     };
+
+    void printStateFlags(const uint32_t events)
+    {
+        std::cout << "================================== State ==================================\n";
+        if (events & EPOLLIN)        std::cout << "EPOLLIN ";
+        if (events & EPOLLPRI)       std::cout << "EPOLLPRI ";
+        if (events & EPOLLOUT)       std::cout << "EPOLLOUT ";
+        if (events & EPOLLRDNORM)    std::cout << "EPOLLRDNORM ";
+        if (events & EPOLLRDBAND)    std::cout << "EPOLLRDBAND ";
+        if (events & EPOLLWRNORM)    std::cout << "EPOLLWRNORM ";
+        if (events & EPOLLWRBAND)    std::cout << "EPOLLWRBAND ";
+        if (events & EPOLLMSG)       std::cout << "EPOLLMSG ";
+        if (events & EPOLLERR)       std::cout << "EPOLLERR ";
+        if (events & EPOLLHUP)       std::cout << "EPOLLHUP ";
+        if (events & EPOLLRDHUP)     std::cout << "EPOLLRDHUP ";
+        if (events & EPOLLEXCLUSIVE) std::cout << "EPOLLEXCLUSIVE ";
+        if (events & EPOLLWAKEUP)    std::cout << "EPOLLWAKEUP ";
+        if (events & EPOLLONESHOT)   std::cout << "EPOLLONESHOT ";
+        if (events & EPOLLET)        std::cout << "EPOLLET ";
+        //else                              std::cout << "Unknown!!!\n";
+        std::cout << "\n==========================================================================\n";
+    }
+
 }
 
 namespace
@@ -112,7 +135,7 @@ namespace
             ::epoll_ctl(fdEpoll, EPOLL_CTL_DEL, fd, nullptr);
         }
 
-        void run() const
+        void run()
         {
             std::array<epoll_event, maxEvents> events{};
             while (true)
@@ -126,7 +149,9 @@ namespace
                 }
                 for (int i = 0; i < eventsCount; ++i)
                 {
-                    const BaseAwaiter* base = static_cast<BaseAwaiter*>(events[i].data.ptr);
+                    BaseAwaiter* base = static_cast<BaseAwaiter*>(events[i].data.ptr);
+                    LOG << "Loop --> resume()\n";
+                    printStateFlags(events[i].events);
                     base->resume(events[i].events);
                 }
             }
@@ -137,18 +162,21 @@ namespace
             EventLoop& loop;
             Handle fd { InvalidHandle };
             std::coroutine_handle<> coroHandle;
+            uint32_t events { 0 };
 
             BaseAwaiter(EventLoop &loop, const Handle fd) : loop(loop), fd(fd) {
             }
 
-            void resume(uint32_t) const {
+            void resume(const uint32_t ev)
+            {
+                events = ev;
                 coroHandle.resume();
             }
 
-            void addEvent(const std::coroutine_handle<> hCoro, const uint32_t events)
+            void addEvent(const std::coroutine_handle<> hCoro, const uint32_t events2Add)
             {
                 coroHandle = hCoro;
-                loop.add(fd, events, this);
+                loop.add(fd, events2Add, this);
             }
         };
 
@@ -197,38 +225,60 @@ namespace
     struct RecvAwaiter : EventLoop::BaseAwaiter
     {
         char* ptrBuffer { nullptr };
-        size_t len { 0U };
-        ssize_t result { 0 };
+        const uint32_t bufferSize { 0U };
+        uint32_t bytesRead { 0 };
 
-        RecvAwaiter(EventLoop& loop, const  Handle fd, char* b, const size_t size)
-            : BaseAwaiter { loop, fd }, ptrBuffer { b }, len { size }
+        RecvAwaiter(EventLoop& loop, const  Handle fd, char* b, const uint32_t size)
+            : BaseAwaiter { loop, fd }, ptrBuffer { b }, bufferSize { size }
         {
             /** **/
         }
 
         bool await_ready()
         {
-            result = ::recv(fd, ptrBuffer, len, 0);
-            if (result >= 0) {
+            const int64_t bytes = ::recv(fd, ptrBuffer + bytesRead, bufferSize - bytesRead, 0);
+            if (bytes > 0) {
+                bytesRead += bytes;
                 return true;
             }
-            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            if (bytes == 0) {
+                return true;
+            }
+            if (errno == EAGAIN) {
                 return false;
             }
-            throw std::runtime_error("recv failed");
+            throw;
         }
 
         void await_suspend(const std::coroutine_handle<> hCoro) {
-            addEvent(hCoro, EPOLLIN);
+            addEvent(hCoro, EPOLLIN | EPOLLRDHUP | EPOLLONESHOT);
         }
 
         ssize_t await_resume()
         {
-            if (result < 0) {
-                result = ::recv(fd, ptrBuffer, len, 0);
+            while (true)
+            {
+                const int64_t bytes = ::recv(fd, ptrBuffer + bytesRead, bufferSize - bytesRead, 0);
+                if (bytes > 0)
+                {
+                    bytesRead += bytes;
+                    LOG << "await_resume bytes Total: " << bytesRead << std::endl;
+                    continue;
+                }
+                if (bytes == 0) {
+                    LOG << "await_resume DEL\n";
+                    loop.del(fd);
+                    return bytesRead;
+                }
+                if (errno == EINTR) {
+                    continue;
+                }
+                if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                    LOG << "await_resume EAGAIN + EWOULDBLOCK\n";
+                   continue;
+                }
+                throw std::runtime_error("recv failed");
             }
-            loop.del(fd);
-            return result;
         }
     };
 
@@ -304,6 +354,15 @@ namespace
 
         explicit Task(const std::coroutine_handle<Promise> hCoro) : handle(hCoro) {
         }
+
+#if 0
+        ~Task()
+        {
+            if (handle) {
+                handle.destroy();
+            }
+        }
+#endif
     };
 
     Task client(EventLoop& loop)
@@ -324,7 +383,7 @@ namespace
         constexpr std::string_view msg { "hello" };
         co_await SendAwaiter { loop, sock, msg.data(), msg.size() };
 
-        std::array<char, 1024> buffer {};
+        std::array<char, 1024 * 10> buffer {};
         const ssize_t bytesReceived = co_await RecvAwaiter { loop, sock, buffer.data(), buffer.size() };
 
         std::cout << "Received: " << std::string_view(buffer.data(), bytesReceived) << std::endl;
@@ -335,6 +394,6 @@ void StdCoroutines::Networking::TcpClientEpoll_Experimental::TestAll()
 {
     EventLoop loop;
     client(loop);
-    client(loop);
+    // client(loop);
     loop.run();
 }
