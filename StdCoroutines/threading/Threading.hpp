@@ -17,6 +17,7 @@ Description : Threading.hpp
 namespace StdCoroutines::Threading
 {
     namespace ThreadsHopping { void TestAll(); }
+    namespace ThreadPoolExecutor { void TestAll(); }
 }
 
 #endif //CPPCOROUTINES_THREADING_HPP
