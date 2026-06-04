@@ -18,34 +18,13 @@ Description : ThreadPoolEx.cpp
 #include <vector>
 #include <deque>
 #include <syncstream>
+#include <utility>
+
 
 #define LOG std::osyncstream { std::cout } << Utilities::getCurrentTime()  \
      << " [" << std::this_thread::get_id() << "] "
 
-namespace
-{
-    using namespace std::chrono;
-
-    constexpr std::string_view FORMAT { "[%d-%02d-%02d %02d:%02d:%02d.%06ld] " };
-
-    [[nodiscard]]
-    std::string now(const time_point<system_clock>& timestamp = system_clock::now()) noexcept
-    {
-        const time_t time { system_clock::to_time_t(timestamp) };
-        std::tm tm {};
-        ::localtime_r(&time, &tm);
-
-        std::string buffer(64, '\0');
-        const int32_t size = std::sprintf(&(buffer.front()), FORMAT.data(),
-                                          tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec,
-                                          duration_cast<microseconds>(timestamp - time_point_cast<seconds>(timestamp)).count());
-        buffer.resize(size);
-        buffer.shrink_to_fit();
-        return buffer;
-    }
-}
-
-namespace
+namespace thread_pool_executor
 {
     template<typename ReturnType,
             typename ... Args>
@@ -126,7 +105,7 @@ namespace
 
         template<class Rep, class Period>
         bool wait_for_and_pop(Task& task,
-                              const duration<Rep, Period> &timeout) noexcept
+                              const std::chrono::duration<Rep, Period> &timeout) noexcept
         {
             std::unique_lock<std::mutex> lock(mutex);
             if (!taskAdded.wait_for(lock, timeout, [this] { return !taskQueue.empty();}))
@@ -186,34 +165,135 @@ namespace
 }
 
 
-void StdCoroutines::Threading::ThreadPoolExecutor::TestAll()
+namespace thread_pool_executor::coroutine
 {
-    using RetType = std::string;
+    ThreadPool<void()> coroThreadPool { 2 };
 
-    auto func = [](const uint32_t timeout) -> RetType {
-        std::this_thread::sleep_for(std::chrono::milliseconds(1u));
-        LOG << "Starting job" << std::endl;
-        std::this_thread::sleep_for(std::chrono::seconds(timeout));
-        LOG << "Job  done\n";
-        return std::string("Task completed(timeout: " + std::to_string(timeout) + ")");
-        // return 12345;
+    struct Task
+    {
+        struct Promise;
+        using promise_type = Promise;
+
+        struct Promise
+        {
+            Task get_return_object() {
+                return Task{
+                    std::coroutine_handle<Promise>::from_promise(*this)
+                };
+            }
+
+            std::suspend_never initial_suspend() noexcept {
+                return {};
+            }
+
+            std::suspend_always final_suspend() noexcept {
+                return {};
+            }
+
+            void return_void() {
+            }
+
+            void unhandled_exception(){
+                std::terminate();
+            }
+        };
+
+        std::coroutine_handle<promise_type> handle;
+
+        explicit Task(const std::coroutine_handle<Promise> hCoro) : handle(hCoro) {
+        }
+
+        ~Task()
+        {
+            if (handle) {
+                handle.destroy();
+            }
+        }
+
+        Task(Task&& other) noexcept : handle { std::exchange(other.handle, nullptr)} {
+        }
+        Task(const Task&) = delete;
     };
 
-    ThreadPool<RetType(int)> pool(4);
-    std::vector<std::future<RetType>> results;
-    for (int i = 1; i <= 8; i++)
+    struct PoolExecutorAwaitable
     {
-        results.push_back(pool.submit(func, 1));
+        bool await_ready() noexcept {
+            return false;
+        }
+
+        void await_suspend(std::coroutine_handle<> hCoro) noexcept
+        {
+            coroThreadPool.submit([hCoro]() {
+                hCoro.resume();
+            });
+        }
+
+        void await_resume() noexcept {
+        }
+    };
+}
+
+
+namespace thread_pool_executor::tests
+{
+    using namespace std::chrono_literals;
+    using namespace thread_pool_executor::coroutine;
+
+    void threadPoolTests()
+    {
+        auto func = [](const uint32_t timeout) -> std::string {
+            std::this_thread::sleep_for(1ms);
+            LOG << "Starting job\n";
+            std::this_thread::sleep_for(std::chrono::seconds(timeout));
+            LOG << "Job done\n";
+            return std::string("Task completed(timeout: " + std::to_string(timeout) + ")");
+        };
+
+        ThreadPool<std::string(int)> pool(2);
+        std::vector<std::future<std::string>> results;
+        for (int i = 1; i <= 4; i++) {
+            results.push_back(pool.submit(func, 1));
+            LOG << "Task submitted\n";
+        }
+
+        std::this_thread::sleep_for(3s);
+
+        const bool done = pool.stopSource.request_stop();
+        LOG << "Done: " << std::boolalpha << done << std::endl;
     }
 
-    LOG << "Waiting" << std::endl;
-    for ( auto& F: results)
+    Task demo()
     {
-        auto result = F.get();
-        LOG<< result << std::endl;
+        for (int i = 0; i < 5; i++) {
+            LOG << "Resuming coroutine using ThreadPool\n";
+            co_await PoolExecutorAwaitable{};
+        }
     }
-    LOG << "Jobs completed" << std::endl;
 
-    const bool done = pool.stopSource.request_stop();
-    LOG << "Done: " << std::boolalpha << done << std::endl;
-};
+    void runCoroutineTest()
+    {
+        LOG << "Thread\n";
+        Task task = demo();
+        std::this_thread::sleep_for(500ms);
+
+        const bool done = coroThreadPool.stopSource.request_stop();
+        LOG << "Done: " << std::boolalpha << done << std::endl;
+
+        // 2026-06-04 18:49:13.218327 [140149885028160] Thread
+        // 2026-06-04 18:49:13.218400 [140149885028160] Resuming coroutine using ThreadPool
+        // 2026-06-04 18:49:13.218414 [140149885024000] Resuming coroutine using ThreadPool
+        // 2026-06-04 18:49:13.218458 [140149885024000] Resuming coroutine using ThreadPool
+        // 2026-06-04 18:49:13.218463 [140149885024000] Resuming coroutine using ThreadPool
+        // 2026-06-04 18:49:13.218467 [140149885024000] Resuming coroutine using ThreadPool
+        // 2026-06-04 18:49:13.718492 [140149885028160] Done: true
+    }
+
+}
+
+void StdCoroutines::Threading::ThreadPoolExecutor::TestAll()
+{
+    using namespace thread_pool_executor::tests;
+
+    // threadPoolTests();
+    runCoroutineTest();
+}
