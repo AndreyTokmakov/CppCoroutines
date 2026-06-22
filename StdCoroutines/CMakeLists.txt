@@ -33,6 +33,7 @@ add_executable(${PROJECT_NAME}
         experiments/FileReader_2.cpp
         experiments/TaskCoordination.cpp
         experiments/Event_Processor.cpp
+        experiments/Event_Synchronization.cpp
         experiments/State_Machine_Simple.cpp
         experiments/Waitable_Coroutine_With_Mutex.cpp
         experiments/EventLoop_Simulation.cpp

@@ -22,6 +22,7 @@ namespace StdCoroutines::Experiments
     namespace Waitable_Coroutine_With_Mutex { void TestAll(); }
     namespace Generic_TaskBased_Coroutine { void TestAll(); }
     namespace Event_Processor { void TestAll(); }
+    namespace Event_Synchronization { void TestAll(); }
     namespace State_Machine_Simple { void TestAll();}
     namespace FileReader { void TestAll(); }
     namespace FileReader_2 { void TestAll(); }

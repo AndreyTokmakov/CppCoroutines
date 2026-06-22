@@ -134,6 +134,7 @@ int main([[maybe_unused]] const int argc,
     // Experiments::Calculating_Average::TestAll();
     // Experiments::PinBall_Game::TestAll();
     // Experiments::Event_Processor::TestAll();
+    Experiments::Event_Synchronization::TestAll();
     // Experiments::State_Machine_Simple::TestAll();
     // Experiments::Generic_TaskBased_Coroutine::TestAll();
     // Experiments::FileReader::TestAll();        // <------------- Not working
