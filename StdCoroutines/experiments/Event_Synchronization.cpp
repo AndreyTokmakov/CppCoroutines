@@ -29,7 +29,7 @@ namespace events_synch
         Event& operator=(const Event&) = delete;
 
         // forward declare
-        class Awaiter;
+        struct  Awaiter;
 
         // returns the awaiter
         Awaiter operator co_await() const noexcept;
@@ -40,7 +40,7 @@ namespace events_synch
 
     private:
 
-        friend class Awaiter;
+        friend struct Awaiter;
 
         // Who's waiting? nullptr if nobody.
         // Points to the Awaiter (which holds the coroutine handle).
@@ -52,10 +52,10 @@ namespace events_synch
     };
 
 
-    class Event::Awaiter
+    struct Event::Awaiter
     {
     public:
-        Awaiter(const Event& eve) : event(eve) {
+        explicit Awaiter(const Event& eve) : event(eve) {
         }
 
         // STEP 1: Should we suspend?
@@ -81,7 +81,7 @@ namespace events_synch
         // Returns true  → "yes, really suspend"
         // Returns false → "changed my mind, don't suspend"
         //                  (race condition: notified between ready and suspend)
-        bool await_suspend(std::coroutine_handle<> handle) noexcept
+        bool await_suspend(const std::coroutine_handle<> handle) noexcept
         {
             coroutineHandle = handle;
 
@@ -102,22 +102,24 @@ namespace events_synch
         }
 
     private:
-        friend class Event;
+        friend struct Event;
         const Event& event;
         std::coroutine_handle<> coroutineHandle;
     };
 
 
     void Event::notify() noexcept
-    {
-        // Set the flag FIRST. This is the "memory" that prevents lost wakeups.
-        // Even if nobody is waiting yet, the flag  persists. When they eventually co_await, await_ready() sees notified==true and skips suspension entirely.
+    {   // Set the flag FIRST. This is the "memory" that prevents lost wakeups.
+        // Even if nobody is waiting yet, the flag  persists.
+        // When they eventually co_await, await_ready() sees notified==true and skips suspension entirely.
         notified.store(true);
 
         // Is anyone currently suspended and waiting?
-        if (auto* waiter = static_cast<Awaiter*>(suspendedWaiter.load()); waiter != nullptr)
-        {   // Yes - resume their coroutine. This is the equivalent of condition_variable::notify_one(), except it's  DIRECT.
-            // No spurious wakeups --  No broadcast. Just "wake up this specific coroutine."
+        if (const auto* waiter = static_cast<Awaiter*>(suspendedWaiter.load()); waiter != nullptr)
+        {   // Yes - resume their coroutine.
+            // This is the equivalent of condition_variable::notify_one(), except it's  DIRECT.
+            // No spurious wakeups -->  No broadcast/
+            // Just "wake up this specific coroutine."
             waiter->coroutineHandle.resume();
         }
     }
@@ -175,9 +177,9 @@ namespace events_synch
     // The coroutine
     Task receiver(Event& event)
     {
-        auto start = std::chrono::high_resolution_clock::now();
+        const auto start = std::chrono::high_resolution_clock::now();
         co_await event;
-        auto elapsed = std::chrono::high_resolution_clock::now() - start;
+        const auto elapsed = std::chrono::high_resolution_clock::now() - start;
         LOG << "Got it! Waited " << std::chrono::duration<double>(elapsed).count() << " seconds.\n";
     }
 }
