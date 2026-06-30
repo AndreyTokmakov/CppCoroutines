@@ -10,9 +10,10 @@ Description : Cooperative_Multitasking.hpp
 #ifndef CPPCOROUTINES_COOPERATIVE_MULTITASKING_HPP
 #define CPPCOROUTINES_COOPERATIVE_MULTITASKING_HPP
 
-namespace use_cases::cooperative_multitasking
+namespace use_cases
 {
-    void TestAll();
+    namespace cooperative_multitasking { void TestAll(); }
+    namespace file_reader_with_iterator { void TestAll(); }
 }
 
 #endif //CPPCOROUTINES_COOPERATIVE_MULTITASKING_HPP

@@ -149,7 +149,7 @@ namespace
 
 void StdCoroutines::Simple::Yield_Coroutine::TestAll()
 {
-    MyCoroutineTask coro = createCoroutine();
+    const MyCoroutineTask coro = createCoroutine();
     std::println("[{}] main function()", getCurrentTime());
     const std::string returnedValue = coro.getValue();
 

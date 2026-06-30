@@ -82,6 +82,7 @@ add_executable(${PROJECT_NAME}
         exception_handling/Exception_Handling.cpp
 
         use_cases/Cooperative_Multitasking.cpp
+        use_cases/FileReaderWithIterator.cpp
 
         frame_custom_allocation/CustomAllocation.cpp
 

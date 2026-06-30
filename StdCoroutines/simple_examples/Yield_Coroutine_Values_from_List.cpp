@@ -82,7 +82,7 @@ namespace
     std::random_device randomDevice{};
     std::mt19937 generator(randomDevice());
 
-    const std::vector<std::string> repository
+    constexpr std::array repository
     {
         "Value_1",
         "Value_2",
@@ -123,6 +123,7 @@ namespace
 
             std::suspend_always yield_value(const std::string& valueIn)
             {
+                // std::println("\t(yield_value{})", valueIn);
                 value = valueIn;
                 return std::suspend_always{};
             }
