@@ -118,7 +118,9 @@ int main([[maybe_unused]] const int argc,
     // Simple::Returning_Coroutine_ComputeResult::TestAll();
 
     // Simple::Resuming_Coroutine_1::TestAll();
+
     // Simple::Awaitable_Sleep::TestAll();
+    Simple::Awaitable_Delay::TestAll();
     // Simple::Awaiter_and_Awaitable::TestAll();
     // Simple::Waitable_Coroutine::TestAll();
     // Simple::Waitable_Coroutine_2::TestAll();
@@ -128,6 +130,7 @@ int main([[maybe_unused]] const int argc,
     // Simple::Mutiple_Awaiters_Initiail_Final::TestAll();
     // Simple::Yield_Coroutine::TestAll();
     // Simple::Yield_Coroutine_Values_from_List::TestAll();
+
 
     // Experiments::TestAll();
     // Experiments::Waitable_Coroutine_With_Mutex::TestAll();
@@ -153,13 +156,13 @@ int main([[maybe_unused]] const int argc,
     // Networking::TcpClientEpoll_2::TestAll();
     // Networking::TcpClientEpoll_IOAwaiters::TestAll();
     // Networking::TcpClientEpoll_IOAwaiters_NoAlloc::TestAll();
-    //Networking::TcpClientEpoll_Experimental::TestAll();
+    // Networking::TcpClientEpoll_Experimental::TestAll();
 
     // Threading::ThreadsHopping::TestAll();
     // Threading::ThreadPoolExecutor::TestAll();
 
     // use_cases::cooperative_multitasking::TestAll();
-    use_cases::file_reader_with_iterator::TestAll();
+    // use_cases::file_reader_with_iterator::TestAll();
 
     // ScheduleCoroutines::SimpleExample::TestAll();
 
